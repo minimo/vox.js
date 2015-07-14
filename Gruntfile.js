@@ -1,8 +1,10 @@
 module.exports = function(grunt) {
     var SRC = [
         "src/vox.js",
+        "src/voxeldata.js",
         "src/xhr.js",
         "src/parser.js",
+        "src/meshfactory.js",
     ];
     
     grunt.loadNpmTasks("grunt-contrib-concat");

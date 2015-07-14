@@ -38,7 +38,7 @@
     var DataHolder = function(byteArray) {
         this.byteArray = byteArray;
         this.cursor = 0;
-        this.data = {};
+        this.data = new vox.VoxelData();
         
         this._currentChunkId = null;
         this._currentChunkSize = 0;
@@ -149,7 +149,6 @@
         for (var i = 0; i < 4; i++) {
             num += dataHolder.next() * Math.pow(256, i);
         }
-        dataHolder.data.voxels = [];
         for (var i = 0; i < num; i++) {
             dataHolder.data.voxels.push({
                 x: dataHolder.next(),
@@ -161,7 +160,6 @@
     };
 
     var contentsOfPaletteChunk = function(dataHolder) {
-        dataHolder.data.palette = [];
         for (var i = 0; i < 256; i++) {
             dataHolder.data.palette.push({
                 r: dataHolder.next(),
