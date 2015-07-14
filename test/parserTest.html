@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<script src="../build/vox.js"></script>
+<script>
+
+var parser = new vox.Parser();
+parser.parse("./p10.vox", function(error, data) {
+    console.assert(error === null,                          "error === null");
+    console.assert(data.size instanceof Object,             "data.size instanceof Object");
+    console.assert(typeof(data.size.x) === 'number',        "typeof(data.size.x) === 'number'");
+    console.assert(typeof(data.size.y) === 'number',        "typeof(data.size.y) === 'number'");
+    console.assert(typeof(data.size.z) === 'number',        "typeof(data.size.z) === 'number'");
+    console.assert(data.voxels instanceof Array,            "data.voxels instanceof Array");
+    console.assert(data.voxels[0] instanceof Object,        "data.voxels[0] instanceof Object");
+    console.assert(typeof(data.voxels[0].x) === 'number',   "typeof(data.voxels[0].x) === 'number'");
+    console.assert(typeof(data.voxels[0].y) === 'number',   "typeof(data.voxels[0].y) === 'number'");
+    console.assert(typeof(data.voxels[0].z) === 'number',   "typeof(data.voxels[0].z) === 'number'");
+    console.assert(typeof(data.voxels[0].colorIndex) === 'number', "typeof(data.voxels[0].colorIndex) === 'number'");
+    console.assert(data.palette instanceof Array,           "data.palette instanceof Array");
+    console.assert(data.palette[0] instanceof Object,       "data.palette[0] instanceof Object");
+    console.assert(typeof(data.palette[0].r) === 'number',  "typeof(data.palette[0].r) === 'number'");
+    console.assert(typeof(data.palette[0].g) === 'number',  "typeof(data.palette[0].g) === 'number'");
+    console.assert(typeof(data.palette[0].b) === 'number',  "typeof(data.palette[0].b) === 'number'");
+    console.assert(typeof(data.palette[0].a) === 'number',  "typeof(data.palette[0].a) === 'number'");
+});
+parser.parse("./parserTest.html", function(error, data) {
+    console.assert(error !== null, "error !== null");
+});
+
+</script>
+
+</body>
+</html>

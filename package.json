@@ -1,0 +1,19 @@
+{
+  "name": "vox.js",
+  "version": "1.0.0",
+  "description": "parse MagicaVoxel .vox file on JavaScript",
+  "main": "build/vox.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "daishihmr",
+  "license": "MIT",
+  "dependencies": {
+    "high": "0.0.4"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-watch": "^0.6.1"
+  }
+}
