@@ -28,7 +28,7 @@ parser.parse("./p10.vox").then(function(voxelData) {
 
 ```
 
-```parse(url)``` method reterns Promise object.
+```.parse(url)``` method reterns Promise object.
 
 ### build THREE.Mesh object
 
@@ -44,10 +44,10 @@ parser.parse("./p10.vox").then(function(voxelData) {
 ```js
 var scene = new THREE.Scene();
 
-var builder = new vox.MeshBuilder(voxelData);
+var builder = new vox.MeshBuilder(voxelData, 1.0);
 var mesh = builder.createMesh();
 scene.add(mesh);
 
 ```
 
-```createMesh()``` method returns THREE.Mesh object.
+```.createMesh(voxelData, voxelSize)``` method returns THREE.Mesh object.
