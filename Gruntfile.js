@@ -4,7 +4,11 @@ module.exports = function(grunt) {
         "src/voxeldata.js",
         "src/xhr.js",
         "src/parser.js",
-        "src/meshfactory.js",
+        "src/meshbuilder.js",
+        "src/texturefactory.js",
+        "src/defaultpalette.js",
+
+        "src/md5.js",
     ];
     
     grunt.loadNpmTasks("grunt-contrib-concat");
@@ -15,6 +19,11 @@ module.exports = function(grunt) {
             vox: {
                 src: SRC,
                 dest: "build/vox.js"
+            }
+        },
+        browserify: {
+            vox: {
+                
             }
         },
         watch: {

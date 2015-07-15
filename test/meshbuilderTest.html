@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<canvas id="c" width="1000" height="1000"></canvas>
+
+<script src="https://cdn.rawgit.com/mrdoob/three.js/r71/build/three.min.js"></script>
+<script src="../build/vox.js"></script>
+<script>
+
+window.onload = function() {
+    var updateListeners = [];
+    var update = function(frame) {
+        updateListeners.forEach(function(listener) {
+            listener(frame);
+        });
+    };
+    
+    var scene = new THREE.Scene();
+
+    var camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1000);
+    var cameraTarget = new THREE.Vector3(0, 0, 0);
+    updateListeners.push(function(frame) {
+        camera.position.x = Math.cos(frame * 0.004) * 100;
+        camera.position.y = 50;
+        camera.position.z = Math.sin(frame * 0.004) * 100;
+        camera.lookAt(cameraTarget);
+    });
+    
+    var directionalLight = new THREE.DirectionalLight(0xffffff);
+    updateListeners.push(function(frame) {
+        directionalLight.position.x = Math.cos(frame * -0.03);
+        directionalLight.position.y = 0;
+        directionalLight.position.z = Math.sin(frame * -0.03);
+        directionalLight.position.normalize();
+    });
+    scene.add(directionalLight);
+
+    var ambientLight = new THREE.AmbientLight(0xaaaaaa);
+    scene.add(ambientLight);
+    
+    var renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById("c")
+    });
+    renderer.setSize(1000, 1000);
+
+    var parser = new vox.Parser();
+    var parseTasks = [
+        "p1.vox",
+        "p2.vox",
+        "p3.vox",
+        "p4.vox",
+        "p5.vox",
+        "p6.vox",
+        "p7.vox",
+        "p8.vox",
+        "p9.vox",
+        "p10.vox",
+        "p11.vox",
+        "p12.vox",
+    ].map(function(path) {
+        return parser.parse(path);
+    });
+    Promise
+        .all(parseTasks)
+        .then(function(voxelDataArray) {
+            voxelDataArray.forEach(function(voxelData, i) {
+                var builder = new vox.MeshBuilder(voxelData, 1.2);
+                var mesh = builder.createMesh();
+                
+                mesh.position.x = Math.random() * 100 - 50;
+                mesh.position.z = Math.random() * 100 - 50;
+                
+                scene.add(mesh);
+            });
+        });
+    
+    var frame = 0;
+    var render = function() {
+        update(frame++);
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    };
+    render();
+};
+</script>
+
+</body>
+</html>

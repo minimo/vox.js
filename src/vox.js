@@ -8,6 +8,7 @@ var vox = {};
     } else {
         vox.global = global;
     }
+    vox.global.vox = vox;
 
     if (typeof(module) !== "undefined") {
         module.exports = vox;

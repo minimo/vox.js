@@ -1,10 +1,18 @@
 (function() {
     
     vox.Parser = function() {};
-    vox.Parser.prototype.parse = function(url, callback) {
-        var xhr = new vox.Xhr();
-        xhr.getBinary(url, function(byteArray) {
-            this.parseUint8Array(byteArray, callback);
+    vox.Parser.prototype.parse = function(url) {
+        return new Promise(function(resolve, reject) {
+            var xhr = new vox.Xhr();
+            xhr.getBinary(url, function(byteArray) {
+                this.parseUint8Array(byteArray, function(error, voxelData) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(voxelData);
+                    }
+                });
+            }.bind(this));
         }.bind(this));
     };
 
@@ -29,6 +37,14 @@
         var dataHolder = new DataHolder(byteArray);
         try {
             root(dataHolder);
+            if (dataHolder.data.palette.length === 0) {
+                // console.debug("use default palette");
+                dataHolder.data.palette = vox.defaultPalette;
+            } else {
+                dataHolder.data.palette.unshift(dataHolder.data.palette[0]);
+                dataHolder.data.palette.pop();
+            }
+
             callback(null, dataHolder.data);
         } catch (e) {
             callback(e);
@@ -56,7 +72,7 @@
     var root = function(dataHolder) {
         magicNumber(dataHolder);
         versionNumber(dataHolder);
-        while (chunk(dataHolder));
+        chunk(dataHolder); // main chunk
     };
     
     var magicNumber = function(dataHolder) {
@@ -79,10 +95,13 @@
     };
     
     var chunk = function(dataHolder) {
+        if (!dataHolder.hasNext()) return false;
+
         chunkId(dataHolder);
         sizeOfChunkContents(dataHolder);
         totalSizeOfChildrenChunks(dataHolder);
         contents(dataHolder);
+        while (chunk(dataHolder));
         return dataHolder.hasNext();
     };
     
@@ -93,6 +112,8 @@
         }
         dataHolder._currentChunkId = id;
         dataHolder._currentChunkSize = 0;
+        
+        // console.debug("chunk id = " + id);
     };
     
     var sizeOfChunkContents = function(dataHolder) {
@@ -101,6 +122,8 @@
             size += dataHolder.next() * Math.pow(256, i);
         }
         dataHolder._currentChunkSize = size;
+        
+        // console.debug("size of chunk = " + size);
     };
     
     var totalSizeOfChildrenChunks = function(dataHolder) {
@@ -108,9 +131,12 @@
         for (var i = 0; i < 4; i++) {
             size += dataHolder.next() * Math.pow(256, i);
         }
+        
+        // console.debug("total size of children chunks = " + size);
     };
     
     var contents = function(dataHolder) {
+        // console.debug("content " + dataHolder._currentChunkId + ", size = " + dataHolder._currentChunkSize);
         switch (dataHolder._currentChunkId) {
         case "SIZE":
             contentsOfSizeChunk(dataHolder);
@@ -137,6 +163,7 @@
         for (var i = 0; i < 4; i++) {
             z += dataHolder.next() * Math.pow(256, i);
         }
+        // console.debug("bounding box size = " + x + ", " + y + ", " + z);
         dataHolder.data.size = {
             x: x,
             y: y,
@@ -149,6 +176,7 @@
         for (var i = 0; i < 4; i++) {
             num += dataHolder.next() * Math.pow(256, i);
         }
+        // console.debug("voxel size = " + num);
         for (var i = 0; i < num; i++) {
             dataHolder.data.voxels.push({
                 x: dataHolder.next(),
@@ -161,12 +189,13 @@
 
     var contentsOfPaletteChunk = function(dataHolder) {
         for (var i = 0; i < 256; i++) {
-            dataHolder.data.palette.push({
+            var p = {
                 r: dataHolder.next(),
                 g: dataHolder.next(),
                 b: dataHolder.next(),
                 a: dataHolder.next(),
-            });
+            };
+            dataHolder.data.palette.push(p);
         }
     };
 
