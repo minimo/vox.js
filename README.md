@@ -28,7 +28,7 @@ parser.parse("./p10.vox").then(function(voxelData) {
 
 ```
 
-```.parse(url)``` method reterns Promise object.
+```.parse(url)``` method returns Promise object.
 
 ### build THREE.Mesh object
 
