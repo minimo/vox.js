@@ -21,11 +21,6 @@ module.exports = function(grunt) {
                 dest: "build/vox.js"
             }
         },
-        browserify: {
-            vox: {
-                
-            }
-        },
         watch: {
             vox: {
                 files: SRC,

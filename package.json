@@ -8,9 +8,7 @@
   },
   "author": "daishihmr",
   "license": "MIT",
-  "dependencies": {
-    "high": "0.0.4"
-  },
+  "dependencies": {},
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "^0.5.1",

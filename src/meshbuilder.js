@@ -1,84 +1,111 @@
 (function() {
 vox.MeshBuilder = function(voxelData, voxelSize) {
-    if (vox.MeshBuilder.textureFactory === null) {
-        vox.MeshBuilder.textureFactory = new vox.TextureFactory();
-    }
+    if (vox.MeshBuilder.textureFactory === null) vox.MeshBuilder.textureFactory = new vox.TextureFactory();
     
-    voxelSize = voxelSize || 1;
-    var palette = voxelData.palette;
-    var offsetX = voxelData.size.x * -0.5;
-    var offsetY = voxelData.size.y * -0.5;
+    this.voxelData = voxelData;
+    this.voxelSize = voxelSize || 1;
 
+    this.geometry = null;
+    this.material = null;
+    
+    this.build();
+};
+
+vox.MeshBuilder.prototype.build = function() {
     this.geometry = new THREE.Geometry();
-    var six = [
-        { x: -1, y: 0, z: 0, ignoreFace: 0 },
-        { x:  1, y: 0, z: 0, ignoreFace: 1 },
-        { x:  0, y:-1, z: 0, ignoreFace: 5 },
-        { x:  0, y: 1, z: 0, ignoreFace: 4 },
-        { x:  0, y: 0, z:-1, ignoreFace: 2 },
-        { x:  0, y: 0, z: 1, ignoreFace: 3 },
-    ];
-    var boxVertices = [
-        { x: -1, y: 1, z:-1 },
-        { x:  1, y: 1, z:-1 },
-        { x: -1, y: 1, z: 1 },
-        { x:  1, y: 1, z: 1 },
-        { x: -1, y:-1, z:-1 },
-        { x:  1, y:-1, z:-1 },
-        { x: -1, y:-1, z: 1 },
-        { x:  1, y:-1, z: 1 },
-    ].map(function(v) {
-        return new THREE.Vector3(v.x * voxelSize * 0.5, v.y * voxelSize * 0.5, v.z * voxelSize * 0.5);
-    });
-    var boxFaces = [
-        [[ 6, 2, 0 ], [ 6, 0, 4 ]],
-        [[ 5, 1, 3 ], [ 5, 3, 7 ]],
-        [[ 5, 7, 6 ], [ 5, 6, 4 ]],
-        [[ 2, 3, 1 ], [ 2, 1, 0 ]],
-        [[ 4, 0, 1 ], [ 4, 1, 5 ]],
-        [[ 7, 3, 2 ], [ 7, 2, 6 ]],
-    ];
-    
-    var hashTable = createHashTable(voxelData.voxels);
-    
-    for (var i = 0, len = voxelData.voxels.length; i < len; i++) {
-        var v = voxelData.voxels[i];
-        var c = palette[v.colorIndex];
-        var color = new THREE.Color(c.r / 255, c.g / 255, c.b / 255);
-        
-        var box = new THREE.Geometry();
-        boxVertices.forEach(function(bv) {
-            box.vertices.push(bv);
-        });
-        box.faceVertexUvs[0] = [];
-        
-        var ignore = [];
-        for (var j = 0; j < 6; j++) {
-            if (hashTable.has(v.x + six[j].x, v.y + six[j].y, v.z + six[j].z)) {
-                ignore.push(six[j].ignoreFace);
-            }
-        }
-        for (var j = 0; j < 6; j++) {
-            if (ignore.indexOf(j) < 0) {
-                var faceA = new THREE.Face3(boxFaces[j][0][0], boxFaces[j][0][1], boxFaces[j][0][2]);
-                var faceB = new THREE.Face3(boxFaces[j][1][0], boxFaces[j][1][1], boxFaces[j][1][2]);
-                box.faces.push(faceA, faceB);
-                var uv = new THREE.Vector2((v.colorIndex + 0.5) / 256, 0.5);
-                box.faceVertexUvs[0].push([uv, uv, uv], [uv, uv, uv]);
-            }
-        }
+    this.material = new THREE.MeshPhongMaterial();
 
-        var m = new THREE.Matrix4();
-        m.makeTranslation((v.x + offsetX) * voxelSize, v.z * voxelSize, -(v.y + offsetY) * voxelSize);
-        this.geometry.merge(box, m);
-    }
+    // 隣接ボクセル検索用ハッシュテーブル
+    var hashTable = createHashTable(this.voxelData.voxels);
+    
+    this.voxelData.voxels.forEach(function(voxel) {
+        var voxGeometry = this._createVoxGeometry(voxel, hashTable);
+        if (voxGeometry) {
+            var offsetX = this.voxelData.size.x * -0.5;
+            var offsetY = this.voxelData.size.y * -0.5;
+            var matrix = new THREE.Matrix4();
+            matrix.makeTranslation((voxel.x + offsetX) * this.voxelSize, voxel.z * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
+            this.geometry.merge(voxGeometry, matrix);
+        }
+    }.bind(this));
+
     this.geometry.mergeVertices();
     this.geometry.computeFaceNormals();
     
-    this.material = new THREE.MeshPhongMaterial({
-        color: new THREE.Color(1, 1, 1),
-        map: vox.MeshBuilder.textureFactory.getTexture(voxelData),
+    this.material.map = vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
+};
+
+vox.MeshBuilder.prototype._createVoxGeometry = function(voxel, hashTable) {
+
+    // 隣接するボクセルを検索し、存在する場合は面を無視する
+    var ignoreFaces = [];
+    six.forEach(function(s) {
+        if (hashTable.has(voxel.x + s.x, voxel.y + s.y, voxel.z + s.z)) {
+            ignoreFaces.push(s.ignoreFace);
+        }
     });
+    
+    // 6方向すべて隣接されていたらnullを返す
+    if (ignoreFaces.length ===  6) return null;
+
+    // 頂点データ
+    var voxVertices = voxVerticesSource.map(function(voxel) {
+        return new THREE.Vector3(voxel.x * this.voxelSize * 0.5, voxel.y * this.voxelSize * 0.5, voxel.z * this.voxelSize * 0.5);
+    }.bind(this));
+
+    // 面データ
+    var voxFaces = voxFacesSource.map(function(f) {
+        return {
+            faceA: new THREE.Face3(f.faceA.a, f.faceA.b, f.faceA.c),
+            faceB: new THREE.Face3(f.faceB.a, f.faceB.b, f.faceB.c),
+        };
+    });
+    
+    // 頂点色
+    // var c = this.voxelData.palette[voxel.colorIndex];
+    // var color = new THREE.Color(c.r / 255, c.g / 255, c.b / 255);
+
+    var vox = new THREE.Geometry();
+    vox.faceVertexUvs[0] = [];
+    
+    // 面を作る
+    voxFaces.forEach(function(faces, i) {
+        if (ignoreFaces.indexOf(i) >= 0) return;
+
+        vox.faces.push(faces.faceA, faces.faceB);
+        var uv = new THREE.Vector2((voxel.colorIndex + 0.5) / 256, 0.5);
+        vox.faceVertexUvs[0].push([uv, uv, uv], [uv, uv, uv]);
+    });
+    
+    // 使っている頂点を抽出
+    var usingVertices = {};
+    vox.faces.forEach(function(face) {
+        usingVertices[face.a] = true;
+        usingVertices[face.b] = true;
+        usingVertices[face.c] = true;
+    });
+    
+    // 面の頂点インデックスを詰める処理
+    var splice = function(index) {
+        vox.faces.forEach(function(face) {
+            if (face.a > index) face.a -= 1;
+            if (face.b > index) face.b -= 1;
+            if (face.c > index) face.c -= 1;
+        });
+    };
+
+    // 使っている頂点のみ追加する
+    var j = 0;
+    voxVertices.forEach(function(vertex, i) {
+        if (usingVertices[i]) {
+            vox.vertices.push(vertex);
+        } else {
+            splice(i - j);
+            j += 1;
+        }
+    });
+    
+    return vox;
 };
 
 vox.MeshBuilder.prototype.createMesh = function() {
@@ -86,6 +113,38 @@ vox.MeshBuilder.prototype.createMesh = function() {
 };
 
 vox.MeshBuilder.textureFactory = null;
+
+// 隣接方向と無視する面の対応表
+var six = [
+    { x: -1, y: 0, z: 0, ignoreFace: 0 },
+    { x:  1, y: 0, z: 0, ignoreFace: 1 },
+    { x:  0, y:-1, z: 0, ignoreFace: 5 },
+    { x:  0, y: 1, z: 0, ignoreFace: 4 },
+    { x:  0, y: 0, z:-1, ignoreFace: 2 },
+    { x:  0, y: 0, z: 1, ignoreFace: 3 },
+];
+
+// 頂点データソース
+var voxVerticesSource = [
+    { x: -1, y: 1, z:-1 },
+    { x:  1, y: 1, z:-1 },
+    { x: -1, y: 1, z: 1 },
+    { x:  1, y: 1, z: 1 },
+    { x: -1, y:-1, z:-1 },
+    { x:  1, y:-1, z:-1 },
+    { x: -1, y:-1, z: 1 },
+    { x:  1, y:-1, z: 1 },
+];
+
+// 面データソース
+var voxFacesSource = [
+    { faceA: { a:6, b:2, c:0 }, faceB: { a:6, b:0, c:4 } },
+    { faceA: { a:5, b:1, c:3 }, faceB: { a:5, b:3, c:7 } },
+    { faceA: { a:5, b:7, c:6 }, faceB: { a:5, b:6, c:4 } },
+    { faceA: { a:2, b:3, c:1 }, faceB: { a:2, b:1, c:0 } },
+    { faceA: { a:4, b:0, c:1 }, faceB: { a:4, b:1, c:5 } },
+    { faceA: { a:7, b:3, c:2 }, faceB: { a:7, b:2, c:6 } },
+];
 
 var hash = function(x, y, z) {
     var result = 1;

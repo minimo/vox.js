@@ -2,20 +2,22 @@
     
     vox.Parser = function() {};
     vox.Parser.prototype.parse = function(url) {
-        return new Promise(function(resolve, reject) {
-            var xhr = new vox.Xhr();
-            xhr.getBinary(url, function(byteArray) {
-                this.parseUint8Array(byteArray, function(error, voxelData) {
+        var self = this;
+        var xhr = new vox.Xhr();
+        return xhr.getBinary(url).then(function(uint8Array) {
+            return new Promise(function(resolve, reject) {
+                self.parseUint8Array(uint8Array, function(error, voxelData) {
                     if (error) {
                         reject(error);
                     } else {
                         resolve(voxelData);
                     }
                 });
-            }.bind(this));
-        }.bind(this));
+            });
+        });
     };
 
+    // for node.js
     if (typeof(require) !== "undefined") {
         var fs = require("fs");
         vox.Parser.prototype.parseFile = function(path, callback) {
@@ -23,18 +25,18 @@
                 if (error) {
                     return callback(error);
                 } else {
-                    var byteArray = new Uint8Array(new ArrayBuffer(data.length));
+                    var uint8Array = new Uint8Array(new ArrayBuffer(data.length));
                     for (var i = 0, len = data.length; i < len; i++) {
-                        byteArray[i] = data[i];
+                        uint8Array[i] = data[i];
                     }
-                    this.parseUint8Array(byteArray, callback);
+                    this.parseUint8Array(uint8Array, callback);
                 }
             }.bind(this));
         };
     }
     
-    vox.Parser.prototype.parseUint8Array = function(byteArray, callback) {
-        var dataHolder = new DataHolder(byteArray);
+    vox.Parser.prototype.parseUint8Array = function(uint8Array, callback) {
+        var dataHolder = new DataHolder(uint8Array);
         try {
             root(dataHolder);
             if (dataHolder.data.palette.length === 0) {
@@ -51,8 +53,8 @@
         }
     };
     
-    var DataHolder = function(byteArray) {
-        this.byteArray = byteArray;
+    var DataHolder = function(uint8Array) {
+        this.uint8Array = uint8Array;
         this.cursor = 0;
         this.data = new vox.VoxelData();
         
@@ -60,13 +62,13 @@
         this._currentChunkSize = 0;
     };
     DataHolder.prototype.next = function() {
-        if (this.byteArray.byteLength <= this.cursor) {
-            throw new Error("byteArray index out of bounds: " + this.byteArray.byteLength);
+        if (this.uint8Array.byteLength <= this.cursor) {
+            throw new Error("uint8Array index out of bounds: " + this.uint8Array.byteLength);
         }
-        return this.byteArray[this.cursor++];
+        return this.uint8Array[this.cursor++];
     };
     DataHolder.prototype.hasNext = function() {
-        return this.cursor < this.byteArray.byteLength;
+        return this.cursor < this.uint8Array.byteLength;
     };
     
     var root = function(dataHolder) {

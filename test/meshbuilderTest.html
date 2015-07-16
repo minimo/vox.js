@@ -31,21 +31,35 @@ window.onload = function() {
     });
     
     var directionalLight = new THREE.DirectionalLight(0xffffff);
+    directionalLight.castShadow = true;
+    directionalLight.shadowCameraVisible = false;
+    directionalLight.shadowMapWidth = 4096;
+    directionalLight.shadowMapHeight = 4096;
     updateListeners.push(function(frame) {
-        directionalLight.position.x = Math.cos(frame * -0.03);
-        directionalLight.position.y = 0;
-        directionalLight.position.z = Math.sin(frame * -0.03);
-        directionalLight.position.normalize();
+        directionalLight.position.x = Math.cos(frame * -0.001) * 100;
+        directionalLight.position.y = 100;
+        directionalLight.position.z = Math.sin(frame * -0.001) * 100;
     });
     scene.add(directionalLight);
 
     var ambientLight = new THREE.AmbientLight(0xaaaaaa);
     scene.add(ambientLight);
     
+    var ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300, 80, 80), new THREE.MeshPhongMaterial({
+        color: 0x555555,
+        shininess: 1,
+        wireframe: true
+    }));
+    ground.receiveShadow = true;
+    ground.rotation.x = Math.PI * -0.5;
+    scene.add(ground);
+    
     var renderer = new THREE.WebGLRenderer({
         canvas: document.getElementById("c")
     });
     renderer.setSize(1000, 1000);
+    renderer.shadowMapEnabled = true;
+    renderer.shadowMapType = THREE.PCFSoftShadowMap;
 
     var parser = new vox.Parser();
     var parseTasks = [
@@ -70,9 +84,19 @@ window.onload = function() {
             voxelDataArray.forEach(function(voxelData, i) {
                 var builder = new vox.MeshBuilder(voxelData, 1.2);
                 var mesh = builder.createMesh();
+                mesh.castShadow = true;
                 
                 mesh.position.x = Math.random() * 100 - 50;
                 mesh.position.z = Math.random() * 100 - 50;
+
+                mesh.rotation.y = Math.random() * Math.PI * 2;
+                
+                var fv = new THREE.Vector3();
+                updateListeners.push(function(frame) {
+                    fv.set(0, 0, 0.1);
+                    fv.applyQuaternion(mesh.quaternion);
+                    mesh.position.add(fv);
+                });
                 
                 scene.add(mesh);
             });
