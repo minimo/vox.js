@@ -1,7 +1,7 @@
 var vox = require("../build/vox");
 
 var parser = new vox.Parser();
-parser.parseFile("p10.vox", function(error, data) {
+parser.parseFile("./vox/p10.vox", function(error, data) {
     console.assert(error === null,                          "error === null");
     console.assert(data.size instanceof Object,             "data.size instanceof Object");
     console.assert(typeof(data.size.x) === 'number',        "typeof(data.size.x) === 'number'");

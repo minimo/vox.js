@@ -9,7 +9,7 @@
 <script>
 
 var parser = new vox.Parser();
-parser.parse("./p10.vox").then(function(data) {
+parser.parse("./vox/p10.vox").then(function(data) {
     console.assert(data.size instanceof Object,             "data.size instanceof Object");
     console.assert(typeof(data.size.x) === 'number',        "typeof(data.size.x) === 'number'");
     console.assert(typeof(data.size.y) === 'number',        "typeof(data.size.y) === 'number'");
