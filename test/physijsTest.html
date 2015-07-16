@@ -94,6 +94,12 @@ window.onload = function() {
                 var builder = new vox.MeshBuilder(voxelData, 1.0);
                 
                 builder.geometry.computeBoundingBox();
+                var height = Math.abs(builder.geometry.boundingBox.max.y - builder.geometry.boundingBox.min.y);
+
+                var m = new THREE.Matrix4();
+                m.makeTranslation(0, -height * 0.5, 0);
+                builder.geometry.applyMatrix(m);
+                builder.geometry.computeBoundingBox();
 
                 setTimeout(function() {
                     setInterval(function() {
