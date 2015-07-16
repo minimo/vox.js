@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<canvas id="c" width="1000" height="1000"></canvas>
+<canvas id="c" width="500" height="500"></canvas>
 
 <script src="https://cdn.rawgit.com/mrdoob/three.js/r71/build/three.min.js"></script>
 <script src="../build/vox.js"></script>
@@ -33,8 +33,8 @@ window.onload = function() {
     var directionalLight = new THREE.DirectionalLight(0xffffff);
     directionalLight.castShadow = true;
     directionalLight.shadowCameraVisible = false;
-    directionalLight.shadowMapWidth = 1024;
-    directionalLight.shadowMapHeight = 1024;
+    directionalLight.shadowMapWidth = 256;
+    directionalLight.shadowMapHeight = 256;
     updateListeners.push(function(frame) {
         directionalLight.position.x = Math.cos(frame * -0.001) * 100;
         directionalLight.position.y = 100;
@@ -49,6 +49,7 @@ window.onload = function() {
         color: 0x555555,
         shininess: 1,
     }));
+    ground.castShadow = false;
     ground.receiveShadow = true;
     ground.rotation.x = Math.PI * -0.5;
     scene.add(ground);
@@ -56,9 +57,9 @@ window.onload = function() {
     var renderer = new THREE.WebGLRenderer({
         canvas: document.getElementById("c")
     });
-    renderer.setSize(1000, 1000);
+    renderer.setSize(500, 500);
     renderer.shadowMapEnabled = true;
-    renderer.shadowMapType = THREE.PCFSoftShadowMap;
+    // renderer.shadowMapType = THREE.PCFSoftShadowMap;
     renderer.setClearColor(0x000000);
 
     var parser = new vox.Parser();
@@ -85,6 +86,7 @@ window.onload = function() {
                 var builder = new vox.MeshBuilder(voxelData, 1.2);
                 var mesh = builder.createMesh();
                 mesh.castShadow = true;
+                mesh.receiveShadow = false;
                 
                 mesh.position.x = Math.random() * 100 - 50;
                 mesh.position.z = Math.random() * 100 - 50;
