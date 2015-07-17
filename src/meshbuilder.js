@@ -7,6 +7,7 @@
      * @param {number=} param.voxelSize ボクセルの大きさ. default = 1.0.
      * @param {boolean=} param.vertexColor 頂点色を使用する. default = false.
      * @param {boolean=} param.optimizeFaces 隠れた頂点／面を削除する. dafalue = true.
+     * @param {boolean=} param.originToBottom 地面の高さを形状の中心にする. dafalue = true.
      * @property {THREE.Geometry} geometry
      * @property {THREE.Material} material
      */
@@ -16,8 +17,9 @@
         param = param || {};
         this.voxelData = voxelData;
         this.voxelSize = param.voxelSize || vox.MeshBuilder.DEFAULT_PARAM.voxelSize;
-        this.vertexColor = param.vertexColor || vox.MeshBuilder.DEFAULT_PARAM.vertexColor;
-        this.optimizeFaces = param.optimizeFaces || vox.MeshBuilder.DEFAULT_PARAM.optimizeFaces;
+        this.vertexColor = (param.vertexColor === undefined) ? vox.MeshBuilder.DEFAULT_PARAM.vertexColor : param.vertexColor;
+        this.optimizeFaces = (param.optimizeFaces === undefined) ? vox.MeshBuilder.DEFAULT_PARAM.optimizeFaces : param.optimizeFaces;
+        this.originToBottom = (param.originToBottom === undefined) ? vox.MeshBuilder.DEFAULT_PARAM.originToBottom : param.originToBottom;
 
         this.geometry = null;
         this.material = null;
@@ -29,6 +31,7 @@
         voxelSize: 1.0,
         vertexColor: false,
         optimizeFaces: true,
+        originToBottom: true,
     };
 
     /**
@@ -41,13 +44,14 @@
         // 隣接ボクセル検索用ハッシュテーブル
         var hashTable = createHashTable(this.voxelData.voxels);
         
+        var offsetX = this.voxelData.size.x * -0.5;
+        var offsetY = this.voxelData.size.y * -0.5;
+        var offsetZ = (this.originToBottom) ? 0 : this.voxelData.size.z * -0.5;
+        var matrix = new THREE.Matrix4();
         this.voxelData.voxels.forEach(function(voxel) {
             var voxGeometry = this._createVoxGeometry(voxel, hashTable);
             if (voxGeometry) {
-                var offsetX = this.voxelData.size.x * -0.5;
-                var offsetY = this.voxelData.size.y * -0.5;
-                var matrix = new THREE.Matrix4();
-                matrix.makeTranslation((voxel.x + offsetX) * this.voxelSize, voxel.z * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
+                matrix.makeTranslation((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
                 this.geometry.merge(voxGeometry, matrix);
             }
         }.bind(this));
