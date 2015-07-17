@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<canvas id="c" width="500" height="500"></canvas>
+
+<script src="https://rawgit.com/mrdoob/three.js/r71/build/three.min.js"></script>
+<script src="./physi.js"></script>
+<script src="../build/vox.js"></script>
+<script>
+
+Physijs.scripts.worker = './physijs_worker.js';
+Physijs.scripts.ammo = './ammo.physijs.js';
+
+window.onload = function() {
+    var updateListeners = [];
+    var update = function(frame) {
+        updateListeners.forEach(function(listener) {
+            listener(frame);
+        });
+    };
+    
+    var scene = new Physijs.Scene();
+    scene.setGravity({
+        x: 0,
+        y: -98 * 0.5,
+        z: 0
+    });
+
+    var camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1000);
+    var cameraTarget = new THREE.Vector3(0, 0, 0);
+    updateListeners.push(function(frame) {
+        camera.position.x = Math.cos(frame * 0.004) * 100;
+        camera.position.y = 20;
+        camera.position.z = Math.sin(frame * 0.004) * 200;
+        camera.lookAt(cameraTarget);
+    });
+    
+    var directionalLight = new THREE.DirectionalLight(0xffffff);
+    directionalLight.castShadow = true;
+    directionalLight.shadowCameraVisible = false;
+    directionalLight.shadowMapWidth = directionalLight.shadowMapHeight = 2048;
+    directionalLight.shadowDarkness = 0.8;
+    updateListeners.push(function(frame) {
+        directionalLight.position.x = Math.cos(frame * -0.001) * 100;
+        directionalLight.position.y = 100;
+        directionalLight.position.z = Math.sin(frame * -0.001) * 100;
+    });
+    scene.add(directionalLight);
+
+    var ambientLight = new THREE.AmbientLight(0xaaaaaa);
+    scene.add(ambientLight);
+    
+    var ground = new Physijs.BoxMesh(
+        new THREE.BoxGeometry(300, 10, 300),
+        new THREE.MeshPhongMaterial({
+            color: 0x555555,
+            shininess: 1,
+        }),
+        0
+    );
+    ground.castShadow = false;
+    ground.receiveShadow = true;
+    ground.position.y = -5;
+    scene.add(ground);
+    
+    var renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById("c")
+    });
+    renderer.setSize(500, 500);
+    renderer.shadowMapEnabled = true;
+    // renderer.shadowMapSoft = true;
+    renderer.setClearColor(0x000000);
+
+    var parser = new vox.Parser();
+    var parseTasks = [
+        "vox/p1.vox",
+        "vox/p2.vox",
+        "vox/p3.vox",
+        "vox/p4.vox",
+        "vox/p5.vox",
+        "vox/p6.vox",
+        "vox/p7.vox",
+        "vox/p8.vox",
+        "vox/p9.vox",
+        "vox/p10.vox",
+        "vox/p11.vox",
+        "vox/p12.vox",
+    ].map(function(path) {
+        return parser.parse(path);
+    });
+    Promise
+        .all(parseTasks)
+        .then(function(voxelDataArray) {
+            var builders = voxelDataArray.map(function(voxelData, i) {
+                var builder = new vox.MeshBuilder(voxelData, 1.0);
+                
+                builder.geometry.computeBoundingBox();
+                var height = Math.abs(builder.geometry.boundingBox.max.y - builder.geometry.boundingBox.min.y);
+                var m = new THREE.Matrix4();
+                m.makeTranslation(0, -height * 0.5, 0);
+                builder.geometry.applyMatrix(m);
+
+                return builder;
+            });
+            
+            updateListeners.push(function(frame) {
+                if (frame % 40 === 0) {
+                    var builder = builders.shift();
+
+                    var mesh = new Physijs.BoxMesh(builder.geometry, builder.material);
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = false;
+                    mesh.position.x = Math.random() * 30 - 15;
+                    mesh.position.y = 200;
+                    mesh.position.z = Math.random() * 30 - 15;
+                    mesh.rotation.x = Math.random() * Math.PI * 2;
+                    mesh.rotation.y = Math.random() * Math.PI * 2;
+                    mesh.rotation.z = Math.random() * Math.PI * 2;
+                
+                    scene.add(mesh);
+                    
+                    builders.push(builder);
+                }
+            });
+        });
+    
+    var frame = 0;
+    var render = function() {
+        update(frame++);
+        scene.simulate();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    };
+    render();
+};
+</script>
+
+</body>
+</html>
