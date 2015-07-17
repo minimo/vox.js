@@ -295,6 +295,10 @@ vox.MeshBuilder.prototype.build = function() {
     this.material.map = vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
 };
 
+vox.MeshBuilder.prototype.getTexture = function() {
+    return vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
+};
+
 vox.MeshBuilder.prototype._createVoxGeometry = function(voxel, hashTable) {
 
     // 隣接するボクセルを検索し、存在する場合は面を無視する

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<canvas id="c" width="500" height="500"></canvas>
+<br>
+<input type="button" onclick="changeColor()" value="changeColor" />
+<img id="img" height="4" style="image-rendering: pixelated">
+
+<script src="https://cdn.rawgit.com/mrdoob/three.js/r71/build/three.min.js"></script>
+<script src="../build/vox.js"></script>
+<script>
+
+var texture = null;
+
+window.onload = function() {
+    var updateListeners = [];
+    var update = function(frame) {
+        updateListeners.forEach(function(listener) {
+            listener(frame);
+        });
+    };
+    
+    var scene = new THREE.Scene();
+
+    var camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1000);
+    var cameraTarget = new THREE.Vector3(0, 5, 0);
+    updateListeners.push(function(frame) {
+        camera.position.x = Math.cos(frame * 0.004) * 30;
+        camera.position.y = 15;
+        camera.position.z = Math.sin(frame * 0.004) * 30;
+        camera.lookAt(cameraTarget);
+    });
+    
+    var directionalLight = new THREE.DirectionalLight(0xffffff);
+    directionalLight.castShadow = true;
+    directionalLight.shadowCameraVisible = false;
+    directionalLight.shadowMapWidth = directionalLight.shadowMapHeight = 1024;
+    updateListeners.push(function(frame) {
+        directionalLight.position.x = Math.cos(frame * -0.001) * 100;
+        directionalLight.position.y = 100;
+        directionalLight.position.z = Math.sin(frame * -0.001) * 100;
+    });
+    scene.add(directionalLight);
+
+    var ambientLight = new THREE.AmbientLight(0xaaaaaa);
+    scene.add(ambientLight);
+    
+    var ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshPhongMaterial({
+        color: 0x555555,
+        shininess: 1,
+    }));
+    ground.castShadow = false;
+    ground.receiveShadow = true;
+    ground.rotation.x = Math.PI * -0.5;
+    scene.add(ground);
+    
+    var renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById("c")
+    });
+    renderer.setSize(500, 500);
+    renderer.shadowMapEnabled = true;
+    renderer.setClearColor(0x000000);
+    
+    var parser = new vox.Parser();
+    parser.parse("p1.vox").then(function(voxelData) {
+        var builder = new vox.MeshBuilder(voxelData, 1.2);
+        var mesh = builder.createMesh();
+        mesh.position.set(0, 0, 0);
+        mesh.castShadow = true;
+        mesh.receiveShadow = false;
+        scene.add(mesh);
+        
+        texture = builder.getTexture();
+        document.getElementById("img").src = texture.image.toDataURL();
+    });
+    
+    var frame = 0;
+    var render = function() {
+        update(frame++);
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    };
+    render();
+};
+
+var changeColor = function() {
+    if (texture === null) return;
+    
+    var canvas = texture.image;
+    var context = canvas.getContext("2d");
+    
+    var rnd = function(){ return Math.floor(Math.random() * 256) };
+    
+    for (var y = 0; y < canvas.height; y++) {
+        for (var x = 0; x < canvas.width; x++) {
+            context.fillStyle = "rgb(" + rnd() + ", " + rnd() + ", " + rnd() + ")";
+            context.fillRect(x, y, 1, 1);
+        }
+    }
+
+    texture.needsUpdate = true;
+    document.getElementById("img").src = texture.image.toDataURL();
+};
+</script>
+
+</body>
+</html>
