@@ -1,14 +1,14 @@
 [MagicaVoxel](https://ephtracy.github.io/) model data parser and mesh builder.
 
-## example
+## Example
 
-[http://daishihmr.github.io/vox.js/test/meshbuilderTest.html](http://daishihmr.github.io/vox.js/test/meshbuilderTest.html)
+[show mesh](http://daishihmr.github.io/vox.js/test/meshbuilderTest.html)
 
-[http://daishihmr.github.io/vox.js/test/physijsTest.html](http://daishihmr.github.io/vox.js/test/physijsTest.html)
+[update texture](http://daishihmr.github.io/vox.js/test/textureTest.html)
 
-[http://daishihmr.github.io/vox.js/test/textureTest.html](http://daishihmr.github.io/vox.js/test/textureTest.html)
+[with Physijs](http://daishihmr.github.io/vox.js/test/physijsTest.html)
 
-## usage
+## Usage
 
 ### parse .vox file
 
@@ -74,3 +74,7 @@ var canvas = textureFactory.createCanvas(voxelData);
 document.getElementById("img").src = canvas.toDataURL();
 ```
 ```.createCanvas(voxelData)``` method returns HTMLCanvasElement.
+
+## API Reference
+
+[http://daishihmr.github.io/vox.js/docs/](http://daishihmr.github.io/vox.js/docs/)
