@@ -8,12 +8,12 @@
 <canvas id="c" width="500" height="500"></canvas>
 
 <script src="https://rawgit.com/mrdoob/three.js/r71/build/three.min.js"></script>
-<script src="./physi.js"></script>
+<script src="./libs/physi.js"></script>
 <script src="../build/vox.js"></script>
 <script>
 
-Physijs.scripts.worker = './physijs_worker.js';
-Physijs.scripts.ammo = './ammo.physijs.js';
+Physijs.scripts.worker = './libs/physijs_worker.js';
+Physijs.scripts.ammo = 'ammo.physijs.js';
 
 window.onload = function() {
     var updateListeners = [];
