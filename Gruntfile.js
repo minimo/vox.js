@@ -13,6 +13,7 @@ module.exports = function(grunt) {
     
     grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks("grunt-contrib-watch");
+    grunt.loadNpmTasks("grunt-contrib-uglify");
 
     grunt.initConfig({
         concat: {
@@ -26,8 +27,14 @@ module.exports = function(grunt) {
                 files: SRC,
                 tasks: ["concat"],
             }
+        },
+        uglify: {
+            vox: {
+                src: "build/vox.js",
+                dest: "build/vox.min.js"
+            }
         }
     });
     
-    grunt.registerTask("default", ["concat"]);
+    grunt.registerTask("default", ["concat", "uglify"]);
 };
