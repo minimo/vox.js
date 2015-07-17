@@ -45,7 +45,9 @@ vox.MeshBuilder.prototype.build = function() {
         }
     }.bind(this));
 
-    this.geometry.mergeVertices();
+    if (this.optimizeFaces) {
+        this.geometry.mergeVertices();
+    }
     this.geometry.computeFaceNormals();
     
     if (this.vertexColor) {
