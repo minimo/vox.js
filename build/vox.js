@@ -292,7 +292,7 @@ var vox = {};
     /**
      * @constructor
      *
-     * @param {Object} param
+     * @param {Object=} param
      * @param {number=} param.voxelSize ボクセルの大きさ. default = 1.0.
      * @param {boolean=} param.vertexColor 頂点色を使用する. default = false.
      * @param {boolean=} param.optimizeFaces 隠れた頂点／面を削除する. dafalue = true.
@@ -302,6 +302,7 @@ var vox = {};
     vox.MeshBuilder = function(voxelData, param) {
         if (vox.MeshBuilder.textureFactory === null) vox.MeshBuilder.textureFactory = new vox.TextureFactory();
         
+        param = param || {};
         this.voxelData = voxelData;
         this.voxelSize = param.voxelSize || vox.MeshBuilder.DEFAULT_PARAM.voxelSize;
         this.vertexColor = param.vertexColor || vox.MeshBuilder.DEFAULT_PARAM.vertexColor;
