@@ -2,7 +2,11 @@
 
 ## example
 
+[http://daishihmr.github.io/vox.js/test/textureTest.html](http://daishihmr.github.io/vox.js/test/textureTest.html)
+
 [http://daishihmr.github.io/vox.js/test/meshbuilderTest.html](http://daishihmr.github.io/vox.js/test/meshbuilderTest.html)
+
+[http://daishihmr.github.io/vox.js/test/physijsTest.html](http://daishihmr.github.io/vox.js/test/physijsTest.html)
 
 ## usage
 
