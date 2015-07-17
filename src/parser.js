@@ -1,6 +1,15 @@
 (function() {
     
+    /** 
+     * @constructor
+     */
     vox.Parser = function() {};
+    
+    /**
+     * 戻り値のPromiseは成功すると{@link vox.VoxelData}を返す.
+     * @param {String} url
+     * @return {Promise}
+     */
     vox.Parser.prototype.parse = function(url) {
         var self = this;
         var xhr = new vox.Xhr();
@@ -17,9 +26,13 @@
         });
     };
 
-    // for node.js
     if (typeof(require) !== "undefined") {
         var fs = require("fs");
+        /**
+         * for node.js
+         * @param {String} path
+         * @param {function} callback
+         */
         vox.Parser.prototype.parseFile = function(path, callback) {
             fs.readFile(path, function(error, data) {
                 if (error) {
@@ -35,6 +48,10 @@
         };
     }
     
+    /**
+     * @param {Uint8Array} uint8Array
+     * @param {function} callback
+     */
     vox.Parser.prototype.parseUint8Array = function(uint8Array, callback) {
         var dataHolder = new DataHolder(uint8Array);
         try {

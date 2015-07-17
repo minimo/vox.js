@@ -1,4 +1,32 @@
-"use strict";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: vox.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: vox.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
 
 /**
  * @namespace
@@ -51,7 +79,7 @@ var vox = {};
             xhr.open("GET", url, true);
             xhr.responseType = "arraybuffer";
             xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && (xhr.status === 200 || xhr.statue === 0)) {
+                if (xhr.readyState === 4 &amp;&amp; (xhr.status === 200 || xhr.statue === 0)) {
                     var arrayBuffer = xhr.response;
                     if (arrayBuffer) {
                         var byteArray = new Uint8Array(arrayBuffer);
@@ -106,7 +134,7 @@ var vox = {};
                     return callback(error);
                 } else {
                     var uint8Array = new Uint8Array(new ArrayBuffer(data.length));
-                    for (var i = 0, len = data.length; i < len; i++) {
+                    for (var i = 0, len = data.length; i &lt; len; i++) {
                         uint8Array[i] = data[i];
                     }
                     this.parseUint8Array(uint8Array, callback);
@@ -146,13 +174,13 @@ var vox = {};
         this._currentChunkSize = 0;
     };
     DataHolder.prototype.next = function() {
-        if (this.uint8Array.byteLength <= this.cursor) {
+        if (this.uint8Array.byteLength &lt;= this.cursor) {
             throw new Error("uint8Array index out of bounds: " + this.uint8Array.byteLength);
         }
         return this.uint8Array[this.cursor++];
     };
     DataHolder.prototype.hasNext = function() {
-        return this.cursor < this.uint8Array.byteLength;
+        return this.cursor &lt; this.uint8Array.byteLength;
     };
     
     var root = function(dataHolder) {
@@ -163,7 +191,7 @@ var vox = {};
     
     var magicNumber = function(dataHolder) {
         var str = "";
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             str += String.fromCharCode(dataHolder.next());
         }
         
@@ -174,7 +202,7 @@ var vox = {};
     
     var versionNumber = function(dataHolder) {
         var ver = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             ver += dataHolder.next() * Math.pow(256, i);
         }
         console.info(".vox format version " + ver);
@@ -193,7 +221,7 @@ var vox = {};
     
     var chunkId = function(dataHolder) {
         var id = "";
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             id += String.fromCharCode(dataHolder.next());
         }
         dataHolder._currentChunkId = id;
@@ -204,7 +232,7 @@ var vox = {};
     
     var sizeOfChunkContents = function(dataHolder) {
         var size = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             size += dataHolder.next() * Math.pow(256, i);
         }
         dataHolder._currentChunkSize = size;
@@ -214,7 +242,7 @@ var vox = {};
     
     var totalSizeOfChildrenChunks = function(dataHolder) {
         var size = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             size += dataHolder.next() * Math.pow(256, i);
         }
         
@@ -238,15 +266,15 @@ var vox = {};
     
     var contentsOfSizeChunk = function(dataHolder) {
         var x = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             x += dataHolder.next() * Math.pow(256, i);
         }
         var y = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             y += dataHolder.next() * Math.pow(256, i);
         }
         var z = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             z += dataHolder.next() * Math.pow(256, i);
         }
         // console.debug("bounding box size = " + x + ", " + y + ", " + z);
@@ -259,11 +287,11 @@ var vox = {};
     
     var contentsOfVoxelChunk = function(dataHolder) {
         var num = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i &lt; 4; i++) {
             num += dataHolder.next() * Math.pow(256, i);
         }
         // console.debug("voxel size = " + num);
-        for (var i = 0; i < num; i++) {
+        for (var i = 0; i &lt; num; i++) {
             dataHolder.data.voxels.push({
                 x: dataHolder.next(),
                 y: dataHolder.next(),
@@ -274,7 +302,7 @@ var vox = {};
     };
 
     var contentsOfPaletteChunk = function(dataHolder) {
-        for (var i = 0; i < 256; i++) {
+        for (var i = 0; i &lt; 256; i++) {
             var p = {
                 r: dataHolder.next(),
                 g: dataHolder.next(),
@@ -524,7 +552,7 @@ var vox = {};
         canvas.width = 256;
         canvas.height= 1;
         var context = canvas.getContext("2d");
-        for (var i = 0, len = palette.length; i < len; i++) {
+        for (var i = 0, len = palette.length; i &lt; len; i++) {
             var p = palette[i];
             context.fillStyle = "rgb(" + p.r + "," + p.g + "," + p.b + ")";
             context.fillRect(i * 1, 0, 1, 1);
@@ -560,7 +588,7 @@ var vox = {};
     
     var getHashCode = function(palette) {
         var str = "";
-        for (var i = 0; i < 256; i++) {
+        for (var i = 0; i &lt; 256; i++) {
             var p = palette[i];
             str += hex(p.r);
             str += hex(p.g);
@@ -851,7 +879,7 @@ var vox = {};
 
 
 /* md5.js - MD5 Message-Digest
- * Copyright (C) 1999,2002 Masanao Izumo <iz@onicos.co.jp>
+ * Copyright (C) 1999,2002 Masanao Izumo &lt;iz@onicos.co.jp>
  * Version: 2.0.0
  * LastModified: May 13 2002
  *
@@ -927,8 +955,8 @@ var MD5_round4 = new Array(new Array( 0, 6,49), new Array( 7,10,50),
                new Array( 4, 6,61), new Array(11,10,62),
                new Array( 2,15,63), new Array( 9,21,64));
 
-function MD5_F(x, y, z) { return (x & y) | (~x & z); }
-function MD5_G(x, y, z) { return (x & z) | (y & ~z); }
+function MD5_F(x, y, z) { return (x &amp; y) | (~x &amp; z); }
+function MD5_G(x, y, z) { return (x &amp; z) | (y &amp; ~z); }
 function MD5_H(x, y, z) { return x ^ y ^ z;          }
 function MD5_I(x, y, z) { return y ^ (x | ~z);       }
 
@@ -938,21 +966,21 @@ var MD5_round = new Array(new Array(MD5_F, MD5_round1),
               new Array(MD5_I, MD5_round4));
 
 function MD5_pack(n32) {
-  return String.fromCharCode(n32 & 0xff) +
-     String.fromCharCode((n32 >>> 8) & 0xff) +
-     String.fromCharCode((n32 >>> 16) & 0xff) +
-     String.fromCharCode((n32 >>> 24) & 0xff);
+  return String.fromCharCode(n32 &amp; 0xff) +
+     String.fromCharCode((n32 >>> 8) &amp; 0xff) +
+     String.fromCharCode((n32 >>> 16) &amp; 0xff) +
+     String.fromCharCode((n32 >>> 24) &amp; 0xff);
 }
 
 function MD5_unpack(s4) {
   return  s4.charCodeAt(0)        |
-     (s4.charCodeAt(1) <<  8) |
-     (s4.charCodeAt(2) << 16) |
-     (s4.charCodeAt(3) << 24);
+     (s4.charCodeAt(1) &lt;&lt;  8) |
+     (s4.charCodeAt(2) &lt;&lt; 16) |
+     (s4.charCodeAt(3) &lt;&lt; 24);
 }
 
 function MD5_number(n) {
-  while (n < 0)
+  while (n &lt; 0)
     n += 4294967296;
   while (n > 4294967295)
     n -= 4294967296;
@@ -975,7 +1003,7 @@ function MD5_apply_round(x, s, f, abcd, r) {
   u = f(s[b], s[c], s[d]);
   t = s[a] + u + x[kk] + MD5_T[ii];
   t = MD5_number(t);
-  t = ((t<<ss) | (t>>>(32-ss)));
+  t = ((t&lt;&lt;ss) | (t>>>(32-ss)));
   t += s[b];
   s[a] = MD5_number(t);
 }
@@ -988,11 +1016,11 @@ function MD5_hash(data) {
 
   state = new Array(0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476);
   len = data.length;
-  index = len & 0x3f;
-  padLen = (index < 56) ? (56 - index) : (120 - index);
+  index = len &amp; 0x3f;
+  padLen = (index &lt; 56) ? (56 - index) : (120 - index);
   if(padLen > 0) {
     data += "\x80";
-    for(i = 0; i < padLen - 1; i++)
+    for(i = 0; i &lt; padLen - 1; i++)
       data += "\x00";
   }
   data += MD5_pack(len * 8);
@@ -1002,19 +1030,19 @@ function MD5_hash(data) {
   x    = new Array(16);
   s    = new Array(4);
 
-  for(k = 0; k < len; k += 64) {
-    for(i = 0, j = k; i < 16; i++, j += 4) {
+  for(k = 0; k &lt; len; k += 64) {
+    for(i = 0, j = k; i &lt; 16; i++, j += 4) {
       x[i] = data.charCodeAt(j) |
-        (data.charCodeAt(j + 1) <<  8) |
-        (data.charCodeAt(j + 2) << 16) |
-        (data.charCodeAt(j + 3) << 24);
+        (data.charCodeAt(j + 1) &lt;&lt;  8) |
+        (data.charCodeAt(j + 2) &lt;&lt; 16) |
+        (data.charCodeAt(j + 3) &lt;&lt; 24);
     }
-    for(i = 0; i < 4; i++)
+    for(i = 0; i &lt; 4; i++)
       s[i] = state[i];
-    for(i = 0; i < 4; i++) {
+    for(i = 0; i &lt; 4; i++) {
       f = MD5_round[i][0];
       r = MD5_round[i][1];
-      for(j = 0; j < 16; j++) {
+      for(j = 0; j &lt; 16; j++) {
     MD5_apply_round(x, s, f, abcd, r[j]);
     tmp = abcd[0];
     abcd[0] = abcd[3];
@@ -1024,7 +1052,7 @@ function MD5_hash(data) {
       }
     }
 
-    for(i = 0; i < 4; i++) {
+    for(i = 0; i &lt; 4; i++) {
       state[i] += s[i];
       state[i] = MD5_number(state[i]);
     }
@@ -1042,10 +1070,10 @@ function MD5_hexhash(data) {
 
     bit128 = MD5_hash(data);
     out = "";
-    for(i = 0; i < 16; i++) {
+    for(i = 0; i &lt; 16; i++) {
     c = bit128.charCodeAt(i);
-    out += "0123456789abcdef".charAt((c>>4) & 0xf);
-    out += "0123456789abcdef".charAt(c & 0xf);
+    out += "0123456789abcdef".charAt((c>>4) &amp; 0xf);
+    out += "0123456789abcdef".charAt(c &amp; 0xf);
     }
     return out;
 }
@@ -1054,3 +1082,26 @@ function MD5_hexhash(data) {
 
 vox.md5 = MD5_hexhash;
 })();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="vox.MeshBuilder.html">MeshBuilder</a></li><li><a href="vox.Parser.html">Parser</a></li><li><a href="vox.TextureFactory.html">TextureFactory</a></li><li><a href="vox.VoxelData.html">VoxelData</a></li></ul><h3>Namespaces</h3><ul><li><a href="vox.html">vox</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha10</a> on Fri Jul 17 2015 15:03:38 GMT+0900 (東京 (標準時))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,5 +1,9 @@
 (function() {
-    
+
+    /**
+     * MagicaVoxelのデフォルトパレット
+     * @static
+     */    
     vox.defaultPalette = [
         {r:255,g:255,b:255,a:255},
         {r:255,g:255,b:255,a:255},

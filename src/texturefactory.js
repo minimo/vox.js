@@ -1,6 +1,13 @@
 (function() {
+    /**
+     * @constructor
+     */
     vox.TextureFactory = function() {};
 
+    /**
+     * @param {vox.VoxelData} voxelData
+     * @return {HTMLCanvasElement}
+     */
     vox.TextureFactory.prototype.createCanvas = function(voxelData) {
         var canvas = document.createElement("canvas");
         canvas.width = 256;
@@ -14,7 +21,13 @@
         
         return canvas;
     };
-
+    
+    /**
+     * パレット情報を元に作成したテクスチャを返す.
+     * 生成されたテクスチャはキャッシュされ、同一のパレットからは同じテクスチャオブジェクトが返される.
+     * @param {vox.VoxelData} voxelData
+     * @return {THREE.Texture}
+     */
     vox.TextureFactory.prototype.getTexture = function(voxelData) {
         var palette = voxelData.palette;
         var hashCode = getHashCode(palette);
