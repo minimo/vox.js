@@ -66,7 +66,7 @@ window.onload = function() {
     renderer.setClearColor(0x000000);
     
     var parser = new vox.Parser();
-    parser.parse("p1.vox").then(function(voxelData) {
+    parser.parse("vox/p1.vox").then(function(voxelData) {
         var builder = new vox.MeshBuilder(voxelData);
         var mesh = builder.createMesh();
         mesh.position.set(0, 0, 0);
