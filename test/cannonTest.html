@@ -159,9 +159,6 @@ var createConvexPolyhedron = function(geometry) {
         return new CANNON.Vec3(v.x, v.y, v.z);
     });
     var faces = geometry.faces
-        .filter(function(f, i) {
-            return true;
-        })
         .map(function(f) {
             return [f.a, f.b, f.c];
         });
@@ -181,12 +178,15 @@ var createManyBox = function(builder) {
         z: size.z * -0.5,
     };
     var h = new CANNON.Vec3(builder.voxelSize * 0.5, builder.voxelSize * 0.5, builder.voxelSize * 0.5);
+    var box = new CANNON.Box(h);
     voxels
         .filter(function(vd, i) {
-            return i % 10 === 0;
+            return builder.isOuterVoxel(vd);
+        })
+        .filter(function(vd, i) { // 適当に間引く
+            return i % 4 === 0;
         })
         .forEach(function(voxel) {
-            var box = new CANNON.Box(h);
             var offset = new CANNON.Vec3(o.x + voxel.x, o.z + voxel.z, -(o.y + voxel.y));
             body.addShape(box, offset);
         });

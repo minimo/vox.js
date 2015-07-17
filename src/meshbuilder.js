@@ -42,14 +42,14 @@
         this.material = new THREE.MeshPhongMaterial();
 
         // 隣接ボクセル検索用ハッシュテーブル
-        var hashTable = createHashTable(this.voxelData.voxels);
+        this.hashTable = createHashTable(this.voxelData.voxels);
         
         var offsetX = this.voxelData.size.x * -0.5;
         var offsetY = this.voxelData.size.y * -0.5;
         var offsetZ = (this.originToBottom) ? 0 : this.voxelData.size.z * -0.5;
         var matrix = new THREE.Matrix4();
         this.voxelData.voxels.forEach(function(voxel) {
-            var voxGeometry = this._createVoxGeometry(voxel, hashTable);
+            var voxGeometry = this._createVoxGeometry(voxel);
             if (voxGeometry) {
                 matrix.makeTranslation((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
                 this.geometry.merge(voxGeometry, matrix);
@@ -75,16 +75,16 @@
         return vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
     };
 
-    vox.MeshBuilder.prototype._createVoxGeometry = function(voxel, hashTable) {
+    vox.MeshBuilder.prototype._createVoxGeometry = function(voxel) {
 
         // 隣接するボクセルを検索し、存在する場合は面を無視する
         var ignoreFaces = [];
         if (this.optimizeFaces) {
             six.forEach(function(s) {
-                if (hashTable.has(voxel.x + s.x, voxel.y + s.y, voxel.z + s.z)) {
+                if (this.hashTable.has(voxel.x + s.x, voxel.y + s.y, voxel.z + s.z)) {
                     ignoreFaces.push(s.ignoreFace);
                 }
-            });
+            }.bind(this));
         }
         
         // 6方向すべて隣接されていたらnullを返す
@@ -162,6 +162,16 @@
      */
     vox.MeshBuilder.prototype.createMesh = function() {
         return new THREE.Mesh(this.geometry, this.material);
+    };
+    
+    /**
+     * 外側に面したボクセルか
+     * @return {boolean}
+     */
+    vox.MeshBuilder.prototype.isOuterVoxel = function(voxel) {
+        return six.filter(function(s) {
+            return this.hashTable.has(voxel.x + s.x, voxel.y + s.y, voxel.z + s.z);
+        }.bind(this)).length < 6;
     };
 
     /**
