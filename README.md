@@ -44,10 +44,29 @@ parser.parse("./p10.vox").then(function(voxelData) {
 ```js
 var scene = new THREE.Scene();
 
-var builder = new vox.MeshBuilder(voxelData, 1.0);
+var param = { voxelSize: 5 };
+var builder = new vox.MeshBuilder(voxelData, param);
 var mesh = builder.createMesh();
 scene.add(mesh);
 
 ```
 
-```.createMesh(voxelData, voxelSize)``` method returns THREE.Mesh object.
+```.createMesh(voxelData, param)``` method returns THREE.Mesh object.
+
+### create Image from palette
+
+#### html
+
+```html
+<script src="vox.js"></script>
+<img id="img">
+```
+
+#### javascript
+
+```js
+var textureFactory = new vox.TextureFactory();
+var canvas = textureFactory.createCanvas(voxelData);
+document.getElementById("img").src = canvas.toDataURL();
+```
+```.createCanvas(voxelData)``` method returns HTMLCanvasElement.

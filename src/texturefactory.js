@@ -1,15 +1,9 @@
 (function() {
     vox.TextureFactory = function() {};
-    vox.TextureFactory.prototype.getTexture = function(voxelData) {
-        var palette = voxelData.palette;
-        var hashCode = getHashCode(palette);
-        if (hashCode in cache) {
-            console.log("cache hit");
-            return cache[hashCode];
-        }
-        
+
+    vox.TextureFactory.prototype.createCanvas = function(voxelData) {
         var canvas = document.createElement("canvas");
-        canvas.width = 256 * 1;
+        canvas.width = 256;
         canvas.height= 1;
         var context = canvas.getContext("2d");
         for (var i = 0, len = palette.length; i < len; i++) {
@@ -17,6 +11,19 @@
             context.fillStyle = "rgb(" + p.r + "," + p.g + "," + p.b + ")";
             context.fillRect(i * 1, 0, 1, 1);
         }
+        
+        return canvas;
+    };
+
+    vox.TextureFactory.prototype.getTexture = function(voxelData) {
+        var palette = voxelData.palette;
+        var hashCode = getHashCode(palette);
+        if (hashCode in cache) {
+            // console.log("cache hit");
+            return cache[hashCode];
+        }
+        
+        var canvas = this.createCanvas(voxelData);
         var texture = new THREE.Texture(canvas);
         texture.needsUpdate = true;
         
