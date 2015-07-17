@@ -31,10 +31,6 @@ window.onload = function() {
     });
     
     var directionalLight = new THREE.DirectionalLight(0xffffff);
-    directionalLight.castShadow = true;
-    directionalLight.shadowCameraVisible = false;
-    directionalLight.shadowMapWidth = 256;
-    directionalLight.shadowMapHeight = 256;
     updateListeners.push(function(frame) {
         directionalLight.position.x = Math.cos(frame * -0.001) * 100;
         directionalLight.position.y = 100;
@@ -49,8 +45,6 @@ window.onload = function() {
         color: 0x555555,
         shininess: 1,
     }));
-    ground.castShadow = false;
-    ground.receiveShadow = true;
     ground.rotation.x = Math.PI * -0.5;
     scene.add(ground);
     
@@ -58,8 +52,6 @@ window.onload = function() {
         canvas: document.getElementById("c")
     });
     renderer.setSize(500, 500);
-    // renderer.shadowMapEnabled = true;
-    // renderer.shadowMapType = THREE.PCFSoftShadowMap;
     renderer.setClearColor(0x000000);
 
     var parser = new vox.Parser();
@@ -83,10 +75,12 @@ window.onload = function() {
         .all(parseTasks)
         .then(function(voxelDataArray) {
             voxelDataArray.forEach(function(voxelData, i) {
-                var builder = new vox.MeshBuilder(voxelData, 1.2);
+                var builder = new vox.MeshBuilder(voxelData, {
+                    voxelSize: 1.2,
+                    vertexColor: false,
+                    optimizeFaces: true,
+                });
                 var mesh = builder.createMesh();
-                mesh.castShadow = true;
-                mesh.receiveShadow = false;
                 
                 mesh.position.x = Math.random() * 100 - 50;
                 mesh.position.z = Math.random() * 100 - 50;

@@ -259,16 +259,32 @@ var vox = {};
 })();
 
 (function() {
-vox.MeshBuilder = function(voxelData, voxelSize) {
+
+/**
+ * @
+ * @param {Object} param
+ * @param {number=1.0} param.voxelSize ボクセルの大きさ
+ * @param {boolean=false} vertexColor 頂点色を使用する
+ * @param {boolean=true} optimizeFaces 隠れた頂点／面を削除する
+ */
+vox.MeshBuilder = function(voxelData, param) {
     if (vox.MeshBuilder.textureFactory === null) vox.MeshBuilder.textureFactory = new vox.TextureFactory();
     
     this.voxelData = voxelData;
-    this.voxelSize = voxelSize || 1;
+    this.voxelSize = param.voxelSize || vox.MeshBuilder.DEFAULT_PARAM.voxelSize;
+    this.vertexColor = param.vertexColor || vox.MeshBuilder.DEFAULT_PARAM.vertexColor;
+    this.optimizeFaces = param.optimizeFaces || vox.MeshBuilder.DEFAULT_PARAM.optimizeFaces;
 
     this.geometry = null;
     this.material = null;
     
     this.build();
+};
+
+vox.MeshBuilder.DEFAULT_PARAM = {
+    voxelSize: 1.0,
+    vertexColor: false,
+    optimizeFaces: true,
 };
 
 vox.MeshBuilder.prototype.build = function() {
@@ -292,7 +308,11 @@ vox.MeshBuilder.prototype.build = function() {
     this.geometry.mergeVertices();
     this.geometry.computeFaceNormals();
     
-    this.material.map = vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
+    if (this.vertexColor) {
+        this.material.vertexColors = THREE.FaceColors;
+    } else {
+        this.material.map = vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
+    }
 };
 
 vox.MeshBuilder.prototype.getTexture = function() {
@@ -303,11 +323,13 @@ vox.MeshBuilder.prototype._createVoxGeometry = function(voxel, hashTable) {
 
     // 隣接するボクセルを検索し、存在する場合は面を無視する
     var ignoreFaces = [];
-    six.forEach(function(s) {
-        if (hashTable.has(voxel.x + s.x, voxel.y + s.y, voxel.z + s.z)) {
-            ignoreFaces.push(s.ignoreFace);
-        }
-    });
+    if (this.optimizeFaces) {
+        six.forEach(function(s) {
+            if (hashTable.has(voxel.x + s.x, voxel.y + s.y, voxel.z + s.z)) {
+                ignoreFaces.push(s.ignoreFace);
+            }
+        });
+    }
     
     // 6方向すべて隣接されていたらnullを返す
     if (ignoreFaces.length ===  6) return null;
@@ -326,8 +348,10 @@ vox.MeshBuilder.prototype._createVoxGeometry = function(voxel, hashTable) {
     });
     
     // 頂点色
-    // var c = this.voxelData.palette[voxel.colorIndex];
-    // var color = new THREE.Color(c.r / 255, c.g / 255, c.b / 255);
+    if (this.vertexColor) {
+        var c = this.voxelData.palette[voxel.colorIndex];
+        var color = new THREE.Color(c.r / 255, c.g / 255, c.b / 255);
+    }
 
     var vox = new THREE.Geometry();
     vox.faceVertexUvs[0] = [];
@@ -335,11 +359,16 @@ vox.MeshBuilder.prototype._createVoxGeometry = function(voxel, hashTable) {
     // 面を作る
     voxFaces.forEach(function(faces, i) {
         if (ignoreFaces.indexOf(i) >= 0) return;
-
+        
+        if (this.vertexColor) {
+            faces.faceA.color = color;
+            faces.faceB.color = color;
+        } else {
+            var uv = new THREE.Vector2((voxel.colorIndex + 0.5) / 256, 0.5);
+            vox.faceVertexUvs[0].push([uv, uv, uv], [uv, uv, uv]);
+        }
         vox.faces.push(faces.faceA, faces.faceB);
-        var uv = new THREE.Vector2((voxel.colorIndex + 0.5) / 256, 0.5);
-        vox.faceVertexUvs[0].push([uv, uv, uv], [uv, uv, uv]);
-    });
+    }.bind(this));
     
     // 使っている頂点を抽出
     var usingVertices = {};

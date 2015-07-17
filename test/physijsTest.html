@@ -96,7 +96,7 @@ window.onload = function() {
         .all(parseTasks)
         .then(function(voxelDataArray) {
             var builders = voxelDataArray.map(function(voxelData, i) {
-                var builder = new vox.MeshBuilder(voxelData, 1.0);
+                var builder = new vox.MeshBuilder(voxelData);
                 
                 builder.geometry.computeBoundingBox();
                 var height = Math.abs(builder.geometry.boundingBox.max.y - builder.geometry.boundingBox.min.y);
