@@ -1,7 +1,7 @@
 var vox = require("../build/vox");
 
 var parser = new vox.Parser();
-parser.parseFile("p10.vox", function(error, data) {
+parser.parseFile("./vox/p10.vox", function(error, data) {
     console.assert(error === null,                          "error === null");
     console.assert(data.size instanceof Object,             "data.size instanceof Object");
     console.assert(typeof(data.size.x) === 'number',        "typeof(data.size.x) === 'number'");
@@ -19,7 +19,9 @@ parser.parseFile("p10.vox", function(error, data) {
     console.assert(typeof(data.palette[0].g) === 'number',  "typeof(data.palette[0].g) === 'number'");
     console.assert(typeof(data.palette[0].b) === 'number',  "typeof(data.palette[0].b) === 'number'");
     console.assert(typeof(data.palette[0].a) === 'number',  "typeof(data.palette[0].a) === 'number'");
+    console.log("parse ok");
 });
 parser.parseFile("parserTest.html", function(error, data) {
     console.assert(error !== null, "error !== null");
+    console.log("error ok");
 });
