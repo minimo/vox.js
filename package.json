@@ -2,10 +2,21 @@
   "name": "vox.js",
   "version": "1.0.0",
   "description": "parse MagicaVoxel .vox file on JavaScript",
+  "homepage": "https://github.com/daishihmr/vox.js",
   "main": "build/vox.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daishihmr/vox.js.git"
+  },
+  "keywords": [
+    "three.js",
+    "MagicaVoxel",
+    "3d",
+    "voxel"
+  ],
   "author": "daishihmr",
   "license": "MIT",
   "dependencies": {},
