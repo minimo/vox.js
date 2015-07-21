@@ -9,6 +9,7 @@
      * @param {boolean=} param.vertexColor 頂点色を使用する. default = false.
      * @param {boolean=} param.optimizeFaces 隠れた頂点／面を削除する. dafalue = true.
      * @param {boolean=} param.originToBottom 地面の高さを形状の中心にする. dafalue = true.
+     * @param {boolean=} param.useMeshFaceMaterial 面にuseMeshFaceMaterialを設定する. dafalue = false.
      * @property {THREE.Geometry} geometry
      * @property {THREE.Material} material
      */
@@ -21,6 +22,7 @@
         this.vertexColor = (param.vertexColor === undefined) ? vox.MeshBuilder.DEFAULT_PARAM.vertexColor : param.vertexColor;
         this.optimizeFaces = (param.optimizeFaces === undefined) ? vox.MeshBuilder.DEFAULT_PARAM.optimizeFaces : param.optimizeFaces;
         this.originToBottom = (param.originToBottom === undefined) ? vox.MeshBuilder.DEFAULT_PARAM.originToBottom : param.originToBottom;
+        this.useMeshFaceMaterial = (param.useMeshFaceMaterial === undefined) ? vox.MeshBuilder.DEFAULT_PARAM.useMeshFaceMaterial : param.useMeshFaceMaterial;
 
         this.geometry = null;
         this.material = null;
@@ -33,6 +35,7 @@
         vertexColor: false,
         optimizeFaces: true,
         originToBottom: true,
+        useMeshFaceMaterial: false,
     };
 
     /**
@@ -40,10 +43,19 @@
      */
     vox.MeshBuilder.prototype.build = function() {
         this.geometry = new THREE.Geometry();
-        this.material = new THREE.MeshPhongMaterial();
+        if (!this.useMeshFaceMaterial) {
+            this.material = new THREE.MeshLambertMaterial();
+        } else {
+            this.material = new THREE.MeshFaceMaterial();
+        }
 
         // 隣接ボクセル検索用ハッシュテーブル
         this.hashTable = createHashTable(this.voxelData.voxels);
+        
+        if (this.useMeshFaceMaterial) {
+            this.mIdx = -1;
+            this.mIdxMap = {};
+        }
         
         var offsetX = this.voxelData.size.x * -0.5;
         var offsetY = this.voxelData.size.y * -0.5;
@@ -67,6 +79,12 @@
         } else {
             this.material.map = vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
         }
+
+        if (this.useMeshFaceMaterial) {
+            this.material.materials.forEach(function(m) {
+                m.map = vox.MeshBuilder.textureFactory.getTexture(this.voxelData);
+            }.bind(this));
+        }        
     };
 
     /**
@@ -124,6 +142,17 @@
                 var uv = new THREE.Vector2((voxel.colorIndex + 0.5) / 256, 0.5);
                 vox.faceVertexUvs[0].push([uv, uv, uv], [uv, uv, uv]);
             }
+
+            if (this.useMeshFaceMaterial) {
+                if (this.mIdxMap[voxel.colorIndex] === undefined) {
+                    this.mIdx += 1;
+                    this.mIdxMap[voxel.colorIndex] = this.mIdx;
+                    this.material.materials.push(new THREE.MeshLambertMaterial());
+                }
+                faces.faceA.materialIndex = this.mIdxMap[voxel.colorIndex];
+                faces.faceB.materialIndex = this.mIdxMap[voxel.colorIndex];
+            }
+
             vox.faces.push(faces.faceA, faces.faceB);
         }.bind(this));
         
