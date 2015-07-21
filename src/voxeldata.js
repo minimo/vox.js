@@ -2,12 +2,9 @@
 
     /**
      * @constructor
-     * @property {Object} size
-     * @property {number} size.x
-     * @property {number} size.y
-     * @property {number} size.z
-     * @property {Array} voxels
-     * @property {Array} palette
+     * @property {Object} size {x, y, z}
+     * @property {Array} voxels [{x, y, z, colorIndex}...]
+     * @property {Array} palette [{r, g, b, a}...]
      */
     vox.VoxelData = function() {
         this.size = {

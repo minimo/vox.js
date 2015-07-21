@@ -8,6 +8,8 @@
 
 [with Physijs](http://daishihmr.github.io/vox.js/test/physijsTest.html)
 
+[with cannon.js](http://daishihmr.github.io/vox.js/test/cannonTest.html)
+
 ## Usage
 
 ### parse .vox file

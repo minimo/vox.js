@@ -154,17 +154,6 @@ window.onload = function() {
     render();
 };
 
-var createConvexPolyhedron = function(geometry) {
-    var points = geometry.vertices.map(function(v) {
-        return new CANNON.Vec3(v.x, v.y, v.z);
-    });
-    var faces = geometry.faces
-        .map(function(f) {
-            return [f.a, f.b, f.c];
-        });
-    return new CANNON.ConvexPolyhedron(points, faces);
-};
-
 var createManyBox = function(builder) {
     var body = new CANNON.Body({
         mass: 1

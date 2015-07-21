@@ -3,6 +3,7 @@
     /**
      * @constructor
      *
+     * @param {vox.VoxelData} voxelData
      * @param {Object=} param
      * @param {number=} param.voxelSize ボクセルの大きさ. default = 1.0.
      * @param {boolean=} param.vertexColor 頂点色を使用する. default = false.

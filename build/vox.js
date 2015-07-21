@@ -23,12 +23,9 @@ var vox = {};
 
     /**
      * @constructor
-     * @property {Object} size
-     * @property {number} size.x
-     * @property {number} size.y
-     * @property {number} size.z
-     * @property {Array} voxels
-     * @property {Array} palette
+     * @property {Object} size {x, y, z}
+     * @property {Array} voxels [{x, y, z, colorIndex}...]
+     * @property {Array} palette [{r, g, b, a}...]
      */
     vox.VoxelData = function() {
         this.size = {
@@ -292,6 +289,7 @@ var vox = {};
     /**
      * @constructor
      *
+     * @param {vox.VoxelData} voxelData
      * @param {Object=} param
      * @param {number=} param.voxelSize ボクセルの大きさ. default = 1.0.
      * @param {boolean=} param.vertexColor 頂点色を使用する. default = false.
