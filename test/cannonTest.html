@@ -29,11 +29,11 @@ window.onload = function() {
     var scene = new THREE.Scene();
 
     var camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1000);
-    var cameraTarget = new THREE.Vector3(0, 0, 0);
+    var cameraTarget = new THREE.Vector3(0, 20, 0);
     updateListeners.push(function(frame) {
-        camera.position.x = Math.cos(frame * 0.004) * 50;
-        camera.position.y = 20;
-        camera.position.z = Math.sin(frame * 0.004) * 100;
+        camera.position.x = 0;
+        camera.position.y = 40;
+        camera.position.z = 60;
         camera.lookAt(cameraTarget);
     });
     
@@ -78,21 +78,13 @@ window.onload = function() {
     renderer.shadowMapEnabled = true;
     // renderer.shadowMapSoft = true;
     renderer.setClearColor(0x000000);
+    
+    document.onclick = function() {
 
     var parser = new vox.Parser();
     var parseTasks = [
-        "vox/p1.vox",
-        "vox/p2.vox",
-        "vox/p3.vox",
-        "vox/p4.vox",
-        "vox/p5.vox",
-        "vox/p6.vox",
-        "vox/p7.vox",
-        "vox/p8.vox",
-        "vox/p9.vox",
-        "vox/p10.vox",
-        "vox/p11.vox",
-        "vox/p12.vox",
+        "vox/p23.vox",
+        "vox/p31.vox",
     ].map(function(path) {
         return parser.parse(path);
     });
@@ -104,33 +96,45 @@ window.onload = function() {
                 return builder;
             });
             
-            updateListeners.push(function(frame) {
-                if (frame % 120 === 0) {
-                    var builder = builders.shift();
+            var rikkaBuilder = builders[0];
+            var manaBuilder = builders[1];
+            
+            var mesh = rikkaBuilder.createMesh();
+            mesh.castShadow = true;
+            mesh.receiveShadow = false;
+            mesh.position.x = -8;
+            mesh.position.y = 20;
+            mesh.position.z = -8;
+            scene.add(mesh);
+            mesh.geometry.computeBoundingBox();
+            var cannonBox = createManyBox(rikkaBuilder);
+            cannonBox.position.x = mesh.position.x;
+            cannonBox.position.y = mesh.position.y;
+            cannonBox.position.z = mesh.position.z;
+            cannonBox.quaternion.copy(mesh.quaternion);
+            cannonWorld.add(cannonBox);
+            updateListeners.push(function() {
+                mesh.position.copy(cannonBox.position);
+                mesh.quaternion.copy(cannonBox.quaternion);
+            });
 
-                    var mesh = builder.createMesh();
+            var iframe = frame;
+            updateListeners.push(function(frame) {
+                if (frame % 30 === 0) {
+                    var mesh = manaBuilder.createMesh();
                     mesh.castShadow = true;
                     mesh.receiveShadow = false;
-                    mesh.position.x = Math.random() * 30 - 15;
-                    mesh.position.y = 200;
-                    mesh.position.z = Math.random() * 30 - 15;
-                    // mesh.rotation.x = Math.random() * Math.PI * 2;
-                    mesh.rotation.y = Math.random() * Math.PI * 2;
-                    // mesh.rotation.z = Math.random() * Math.PI * 2;
+                    
+                    mesh.position.x = -10 + Math.random() * 20;
+                    mesh.position.y = 100;
+                    mesh.position.z = -10 + Math.random() * 20;
+                    mesh.rotation.y = 1;
                 
                     scene.add(mesh);
                     
-                    builders.push(builder);
-                    
                     mesh.geometry.computeBoundingBox();
-                    var bb = mesh.geometry.boundingBox;
                     
-                    // var cannonBox = new CANNON.Body({
-                    //     mass: 1,
-                    //     shape: new CANNON.Box(new CANNON.Vec3((bb.max.x-bb.min.x)*.5, (bb.max.y-bb.min.y)*.5, (bb.max.z-bb.min.z)*.5))
-                    //     // shape: createConvexPolyhedron(mesh.geometry),
-                    // });
-                    var cannonBox = createManyBox(builder);
+                    var cannonBox = createManyBox(manaBuilder);
                     cannonBox.position.x = mesh.position.x;
                     cannonBox.position.y = mesh.position.y;
                     cannonBox.position.z = mesh.position.z;
@@ -139,10 +143,12 @@ window.onload = function() {
                     updateListeners.push(function() {
                         mesh.position.copy(cannonBox.position);
                         mesh.quaternion.copy(cannonBox.quaternion);
-                    })
+                    });
                 }
             });
         });
+
+    };
     
     var frame = 0;
     var render = function() {

@@ -45,9 +45,9 @@
         // 隣接ボクセル検索用ハッシュテーブル
         this.hashTable = createHashTable(this.voxelData.voxels);
         
-        var offsetX = this.voxelData.size.x * -0.5;
-        var offsetY = this.voxelData.size.y * -0.5;
-        var offsetZ = (this.originToBottom) ? 0 : this.voxelData.size.z * -0.5;
+        var offsetX = (this.voxelData.size.x - 1) * -0.5;
+        var offsetY = (this.voxelData.size.y - 1) * -0.5;
+        var offsetZ = (this.originToBottom) ? 0 : (this.voxelData.size.z - 1) * -0.5;
         var matrix = new THREE.Matrix4();
         this.voxelData.voxels.forEach(function(voxel) {
             var voxGeometry = this._createVoxGeometry(voxel);
@@ -215,7 +215,7 @@
 
     var hash = function(x, y, z) {
         var result = 1;
-        var prime = 31;
+        var prime = 2411;
         result = prime * result + x;
         result = prime * result + y;
         result = prime * result + z;
