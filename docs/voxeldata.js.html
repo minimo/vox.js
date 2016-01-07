@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Index</title>
+    <title>JSDoc: Source: voxeldata.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,37 @@
 
 <div id="main">
 
-    <h1 class="page-title">Index</h1>
+    <h1 class="page-title">Source: voxeldata.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>(function() {
 
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
+    /**
+     * @constructor
+     * @property {Object} size {x, y, z}
+     * @property {Array} voxels [{x, y, z, colorIndex}...]
+     * @property {Array} palette [{r, g, b, a}...]
+     */
+    vox.VoxelData = function() {
+        this.size = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+        this.voxels = [];
+        this.palette = [];
+    };
     
-
-
-
-
-
+})();
+</code></pre>
+        </article>
+    </section>
 
 
 
