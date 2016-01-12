@@ -1,6 +1,6 @@
 {
   "name": "vox.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "parse MagicaVoxel .vox file on JavaScript",
   "homepage": "https://github.com/daishihmr/vox.js",
   "main": "build/vox.js",
