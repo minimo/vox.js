@@ -501,7 +501,7 @@ var vox = {};
 
     var hash = function(x, y, z) {
         var result = 1;
-        var prime = 2411;
+        var prime = 503;
         result = prime * result + x;
         result = prime * result + y;
         result = prime * result + z;
