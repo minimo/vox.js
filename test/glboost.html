@@ -35,6 +35,19 @@
 
   var material = new GLBoost.ClassicMaterial('#world');
   material.shader = new GLBoost.PhongShader(canvas);
+
+  var cubeGeometry = new GLBoost.Cube(new vec3(1.0, 1.0, 1.0), new vec3(1.0, 1.0, 1.0), '#world');
+  var cube0 = new GLBoost.Mesh(cubeGeometry, material);
+  cube0.rotate.x = 0.1;
+  scene.add(cube0);
+
+  var parser = new vox.Parser();
+  var parseTasks = [
+    "vox/ship.vox",
+  ].map(function(path) {
+    return parser.parse(path);
+  });
+
   Promise
     .all(parseTasks)
     .then(function(voxelDataArray) {
@@ -62,18 +75,6 @@
       });
     });
 
-  var cubeGeometry = new GLBoost.Cube(new vec3(1.0, 1.0, 1.0), new vec3(1.0, 1.0, 1.0), '#world');
-  var cube0 = new GLBoost.Mesh(cubeGeometry, material);
-  cube0.rotate.x = 0.1;
-  scene.add(cube0);
-
-  var parser = new vox.Parser();
-  var parseTasks = [
-    "vox/ship.vox",
-  ].map(function(path) {
-    return parser.parse(path);
-  });
-
   var camera = new GLBoost.Camera({
     eye: new vec4(0.0, 10, 0, 1),
     center: new vec3(0.0, 0.0, 0.0),
@@ -92,7 +93,7 @@
     renderer.clearCanvas();
     renderer.draw(scene);
 
-    cube0.rotate.z += 0.02;
+    cube0.rotate.z += 0.2;
     cube0._needUpdate();
 
     requestAnimationFrame(render);
