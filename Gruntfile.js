@@ -5,6 +5,7 @@ module.exports = function(grunt) {
         "src/xhr.js",
         "src/parser.js",
         "src/meshbuilder.js",
+        "src/glboostmeshbuilder.js",
         "src/texturefactory.js",
         "src/defaultpalette.js",
 
