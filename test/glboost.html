@@ -52,7 +52,7 @@
     .all(parseTasks)
     .then(function(voxelDataArray) {
       voxelDataArray.forEach(function(voxelData, i) {
-        var builder = new vox.GLBoostGeometryBuilder(voxelData, {
+        var builder = new vox.GLBoostMeshBuilder(voxelData, {
           voxelSize: 1.8,
           vertexColor: false,
           optimizeFaces: true,
