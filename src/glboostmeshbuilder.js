@@ -38,9 +38,8 @@
     /**
      * Voxelデータからジオメトリとマテリアルを作成する.
      */
-    vox.GLBoostMeshBuilder.prototype.build = function(canvas) {
-        this.geometry = new GLBoost.Geometry(canvas);
-        this.material = null;
+    vox.GLBoostMeshBuilder.prototype.build = function(GLBoostContext) {
+        var glbc = GLBoostContext;
 
         // 隣接ボクセル検索用ハッシュテーブル
         this.hashTable = createHashTable(this.voxelData.voxels);
@@ -48,24 +47,23 @@
         var offsetX = (this.voxelData.size.x - 1) * -0.5;
         var offsetY = (this.voxelData.size.y - 1) * -0.5;
         var offsetZ = (this.originToBottom) ? 0 : (this.voxelData.size.z - 1) * -0.5;
-        var matrix = new GLBoost.Matrix4();
+        var matrix = new GLBoost.Matrix44();
         this.voxelData.voxels.forEach(function(voxel) {
-            // var voxGeometry = this._createVoxGeometry(voxel);
-            // if (voxGeometry) {
-            //     matrix.makeTranslation((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
-            //     this.geometry.merge(voxGeometry, matrix);
-            // }
+            this.geometry = this._createVoxGeometry(glbc, voxel);
+            if (this.geometry) {
+                var t = new GLBoost.Vector3((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize));
+            }
         }.bind(this));
 
         if (this.optimizeFaces) {
             // this.geometry.mergeVertices();
         }
-        this.geometry.computeFaceNormals();
+//        this.geometry.computeFaceNormals();
         
         if (this.vertexColor) {
             // this.material.vertexColors = THREE.FaceColors;
         } else {
-            // this.material.map = vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
+            this.material.texture = vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
         }
     };
 
@@ -76,7 +74,8 @@
         return vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
     };
 
-    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(voxel) {
+    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(GLBoostContext, voxel) {
+        var glbc = GLBoostContext;
 
         // 隣接するボクセルを検索し、存在する場合は面を無視する
         var ignoreFaces = [];
@@ -93,14 +92,15 @@
 
         // 頂点データ
         var voxVertices = voxVerticesSource.map(function(voxel) {
-            return new GLBoost.Vector3(voxel.x * this.voxelSize * 0.5, voxel.y * this.voxelSize * 0.5, voxel.z * this.voxelSize * 0.5);
+            var vs = this.voxelSize * 0.5;
+            return new GLBoost.Vector3(voxel.x * vs, voxel.y * vs, voxel.z * vs);
         }.bind(this));
 
         // 面データ
         var voxFaces = voxFacesSource.map(function(f) {
             return {
-                faceA: new THREE.Face3(f.faceA.a, f.faceA.b, f.faceA.c),
-                faceB: new THREE.Face3(f.faceB.a, f.faceB.b, f.faceB.c),
+                faceA: [f.faceA.a, f.faceA.b, f.faceA.c],
+                faceB: [f.faceB.a, f.faceB.b, f.faceB.c],
             };
         });
         
@@ -110,8 +110,7 @@
             var color = new GLBoost.Vector3(c.r / 255, c.g / 255, c.b / 255);
         }
 
-        var vox = new GLBoost.Geometry();
-        vox.faceVertexUvs[0] = [];
+        var vox = glbc.CreateGeometry();
         
         // 面を作る
         voxFaces.forEach(function(faces, i) {
