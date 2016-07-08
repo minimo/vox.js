@@ -12,7 +12,7 @@
      * @property {GLBoost.Geometry} geometry
      * @property {GLBoost.Material} material
      */
-    vox.GLBoostMeshBuilder = function(voxelData, param) {
+    vox.GLBoostMeshBuilder = function(GLBoostContext, voxelData, param) {
         if (vox.GLBoostMeshBuilder.textureFactory === null) vox.GLBoostMeshBuilder.textureFactory = new vox.TextureFactory();
         
         param = param || {};
@@ -24,7 +24,8 @@
 
         this.geometry = null;
         this.material = null;
-        
+        this.glbc = GLBoostContext;
+
         this.build();
     };
 
@@ -38,8 +39,7 @@
     /**
      * Voxelデータからジオメトリとマテリアルを作成する.
      */
-    vox.GLBoostMeshBuilder.prototype.build = function(GLBoostContext) {
-        var glbc = GLBoostContext;
+    vox.GLBoostMeshBuilder.prototype.build = function() {
 
         // 隣接ボクセル検索用ハッシュテーブル
         this.hashTable = createHashTable(this.voxelData.voxels);
@@ -49,9 +49,9 @@
         var offsetZ = (this.originToBottom) ? 0 : (this.voxelData.size.z - 1) * -0.5;
         var matrix = new GLBoost.Matrix44();
         this.voxelData.voxels.forEach(function(voxel) {
-            this.geometry = this._createVoxGeometry(glbc, voxel);
+            this.geometry = this._createVoxGeometry(this.glbc, voxel);
             if (this.geometry) {
-                var t = new GLBoost.Vector3((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize));
+                var t = new GLBoost.Vector3((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
             }
         }.bind(this));
 
@@ -161,7 +161,7 @@
      * @return {GLBoost.Mesh}
      */
     vox.GLBoostMeshBuilder.prototype.createMesh = function() {
-        return new GLBoost.Mesh(this.geometry, this.material);
+        return this.glbc.createMesh(this.geometry, this.material);
     };
     
     /**
