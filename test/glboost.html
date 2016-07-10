@@ -35,15 +35,14 @@
   var light = glBoostContext.createDirectionalLight(new vec3(1.0, 1.0, 1.0), new vec3(1.0, -1.0, 1.0), "#world");
   scene.addChild(light);
 
-  var material = glBoostContext.createClassicMaterial('#world');
-  material.shader = new GLBoost.PhongShader();
+  var material = glBoostContext.createClassicMaterial();
+  material.shaderClass = GLBoost.PhongShader;
 
-  var cubeGeometry = glBoostContext.createCube(new vec3(1.0, 1.0, 1.0), new vec3(1.0, 1.0, 1.0), '#world');
+  var cubeGeometry = glBoostContext.createCube(new vec3(1.0, 1.0, 1.0), new vec3(1.0, 1.0, 1.0));
   var cube0 = glBoostContext.createMesh(cubeGeometry, material);
   cube0.rotate.x = 0.1;
   scene.addChild(cube0);
 
-/*
   var parser = new vox.Parser();
   var parseTasks = [
     "vox/ship.vox",
@@ -55,7 +54,7 @@
     .all(parseTasks)
     .then(function(voxelDataArray) {
       voxelDataArray.forEach(function(voxelData, i) {
-        var builder = new vox.GLBoostMeshBuilder(voxelData, {
+        var builder = new vox.GLBoostMeshBuilder(glBoostContext, voxelData, {
           voxelSize: 1.8,
           vertexColor: false,
           optimizeFaces: true,
@@ -77,7 +76,7 @@
         scene.add(mesh);
       });
     });
-*/
+
   var camera = glBoostContext.createCamera({
     eye: new vec4(0.0, 10, 0, 1),
     center: new vec3(0.0, 0.0, 0.0),
@@ -98,7 +97,9 @@
     renderer.clearCanvas();
     renderer.draw(expression);
 
-    cube0.rotate.z += 0.2;
+    cube0.rotate.x += 0.1;
+    cube0.rotate.y += 0.3;
+    cube0.rotate.z += 0.5;
     cube0._needUpdate();
 
     requestAnimationFrame(render);

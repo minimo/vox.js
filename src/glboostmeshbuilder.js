@@ -43,15 +43,26 @@
 
         // 隣接ボクセル検索用ハッシュテーブル
         this.hashTable = createHashTable(this.voxelData.voxels);
+
+        //ジオメトリ情報
+        var positions = [];
+        var normals = [];
+        var colors = [];
+        var coords = [];
+        var indices = [];
         
         var offsetX = (this.voxelData.size.x - 1) * -0.5;
         var offsetY = (this.voxelData.size.y - 1) * -0.5;
         var offsetZ = (this.originToBottom) ? 0 : (this.voxelData.size.z - 1) * -0.5;
+ 
         var matrix = new GLBoost.Matrix44();
         this.voxelData.voxels.forEach(function(voxel) {
-            this.geometry = this._createVoxGeometry(this.glbc, voxel);
-            if (this.geometry) {
-                var t = new GLBoost.Vector3((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
+            var pix = this._createVoxGeometry(voxel);
+            if (pix) {
+                var x =  (voxel.x + offsetX) * this.voxelSize;
+                var y =  (voxel.y + offsetY) * this.voxelSize;
+                var z =  (voxel.z + offsetZ) * this.voxelSize;
+                var t = new GLBoost.Vector3(x, z, -y);
             }
         }.bind(this));
 
@@ -65,6 +76,12 @@
         } else {
             this.material.texture = vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
         }
+        this.geometry = this.glbc.createGeometry({
+            position: positions,
+            color: colors,
+            normal: normals,
+            texcoord: texcoords
+        });
     };
 
     /**
@@ -74,9 +91,7 @@
         return vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
     };
 
-    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(GLBoostContext, voxel) {
-        var glbc = GLBoostContext;
-
+    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(voxel) {
         // 隣接するボクセルを検索し、存在する場合は面を無視する
         var ignoreFaces = [];
         if (this.optimizeFaces) {
@@ -89,6 +104,13 @@
         
         // 6方向すべて隣接されていたらnullを返す
         if (ignoreFaces.length ===  6) return null;
+
+        var vox = {
+            positions: [],
+            colors: [],
+            coords: [],
+            faces: [],
+        };
 
         // 頂点データ
         var voxVertices = voxVerticesSource.map(function(voxel) {
@@ -109,8 +131,6 @@
             var c = this.voxelData.palette[voxel.colorIndex];
             var color = new GLBoost.Vector3(c.r / 255, c.g / 255, c.b / 255);
         }
-
-        var vox = glbc.CreateGeometry();
         
         // 面を作る
         voxFaces.forEach(function(faces, i) {
@@ -120,14 +140,17 @@
                 faces.faceA.color = color;
                 faces.faceB.color = color;
             } else {
+                faces.faceA.color = 255;
+                faces.faceB.color = 255;
                 var uv = new GLBoost.Vector2((voxel.colorIndex + 0.5) / 256, 0.5);
-                vox.faceVertexUvs[0].push([uv, uv, uv], [uv, uv, uv]);
+                faces.faceVertexUvs = [];
+                faces.faceVertexUvs.push([uv, uv, uv], [uv, uv, uv]);
             }
             vox.faces.push(faces.faceA, faces.faceB);
         }.bind(this));
         
         // 使っている頂点を抽出
-        var usingVertices = {};
+        var usingVertices = [];
         vox.faces.forEach(function(face) {
             usingVertices[face.a] = true;
             usingVertices[face.b] = true;
