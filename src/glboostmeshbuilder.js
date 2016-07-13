@@ -126,7 +126,7 @@
 
         var vox = {
             vertices: [],
-            faces: []
+            faces: [],
         };
         
         // 面を作る
@@ -143,6 +143,51 @@
             vox.faces.push(faces.faceA, faces.faceB);
         }.bind(this));
         
+        // 使っている頂点を抽出
+        var usingVertices = {};
+        vox.faces.forEach(function(face) {
+            usingVertices[face.a] = true;
+            usingVertices[face.b] = true;
+            usingVertices[face.c] = true;
+        });
+        
+        // 面の頂点インデックスを詰める処理
+        var splice = function(index) {
+            vox.faces.forEach(function(face) {
+                if (face.a > index) face.a -= 1;
+                if (face.b > index) face.b -= 1;
+                if (face.c > index) face.c -= 1;
+            });
+        };
+
+        // 使っている頂点のみ追加する
+        var j = 0;
+        voxVertices.forEach(function(vertex, i) {
+            if (usingVertices[i]) {
+                vox.vertices.push(vertex);
+            } else {
+                splice(i - j);
+                j += 1;
+            }
+        });
+
+        // 頂点情報構築
+        var positions = [];
+        var colors = [];
+        var normals = [];
+        var texcoords = [];
+        var indices = [];
+
+        vox.vertices.forEach(function(v) {
+            positions.push(v);
+            colors.push(color);
+            normals.push(new GLBoost.Vector3(1.0, 1.0, 1.0));
+            texcoords.push(uv);
+        }.bind(this));
+
+        
+
+/*
         // 頂点情報構築
         var positions = [];
         var colors = [];
@@ -168,7 +213,9 @@
             texcoords.push(face.uv);
 
             // index
-            indices.push([positions.length-3, positions.length-2, positions.length-1]);
+            indices.push(positions.length-3);
+            indices.push(positions.length-2);
+            indices.push(positions.length-1);
         }.bind(this));
 
         var geo = this.glbc.createGeometry();
@@ -177,7 +224,8 @@
             color: colors,
             normal: normals,
             texcoord: texcoords
-        }, indices);
+        }, [indices]);
+*/
         return geo;
     };
 
@@ -234,6 +282,18 @@
         { faceA: { a:2, b:3, c:1 }, faceB: { a:2, b:1, c:0 } },
         { faceA: { a:4, b:0, c:1 }, faceB: { a:4, b:1, c:5 } },
         { faceA: { a:7, b:3, c:2 }, faceB: { a:7, b:2, c:6 } },
+    ];
+
+    // 法線データソース
+    var voxNormalsSource = [
+        { x:  1, y: 0, z: 0 },
+        { x:  1, y: 0, z: 0 },
+        { x:  1, y: 0, z: 0 },
+        { x:  1, y: 0, z: 0 },
+        { x:  1, y: 0, z: 0 },
+        { x:  1, y: 0, z: 0 },
+        { x:  1, y: 0, z: 0 },
+        { x:  1, y: 0, z: 0 },
     ];
 
     var hash = function(x, y, z) {
