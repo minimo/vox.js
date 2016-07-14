@@ -75,6 +75,7 @@
 
         // マテリアル情報
         this.material = this.glbc.createClassicMaterial();
+        this.material.shaderClass = GLBoost.PhongShader;
         if (this.vertexColor) {
             // this.material.vertexColors = THREE.FaceColors;
         } else {
@@ -123,6 +124,7 @@
             var c = this.voxelData.palette[voxel.colorIndex];
             color = new GLBoost.Vector4(c.r/255, c.g/255, c.b/255, 1.0);
         }
+        var uv = new GLBoost.Vector2((voxel.colorIndex+0.5)/256, 0.5);
 
         var vox = {
             vertices: [],
@@ -136,7 +138,6 @@
             faces.faceA.color = color;
             faces.faceB.color = color;
             if (!this.vertexColor) {
-                var uv = new GLBoost.Vector2((voxel.colorIndex+0.5)/256, 0.5);
                 faces.faceA.uv = uv;
                 faces.faceB.uv = uv;
             }
@@ -185,7 +186,11 @@
             texcoords.push(uv);
         }.bind(this));
 
-        
+        vox.faces.forEach(function(f) {
+            indices.push(f.a);
+            indices.push(f.b);
+            indices.push(f.c);
+        }.bind(this));        
 
 /*
         // 頂点情報構築
@@ -217,7 +222,7 @@
             indices.push(positions.length-2);
             indices.push(positions.length-1);
         }.bind(this));
-
+*/
         var geo = this.glbc.createGeometry();
         geo.setVerticesData({
             position: positions,
@@ -225,7 +230,8 @@
             normal: normals,
             texcoord: texcoords
         }, [indices]);
-*/
+
+        var geo = glBoostContext.createCube(new vec3(1.0, 1.0, 1.0), new vec3(1.0, 1.0, 1.0));
         return geo;
     };
 
