@@ -45,28 +45,46 @@
         this.hashTable = createHashTable(this.voxelData.voxels);
 
         // ジオメトリ情報
-        this.geometry = null;
-        
+        var positions = [];
+        var colors = [];
+        var normals = [];
+        var texcoords = [];
+        var indices = [];
+        //頂点情報マージ
+        var merge = function(geo, offset) {
+            var base = positions.length;
+            var len = geo.position.length;
+            for (var i = 0; i < len; i++) {
+                positions.push(geo.position[i].add(offset));
+                colors.push(geo.color[i]);
+                normals.push(geo.normal[i]);
+                texcoords.push(geo.texcoord[i]);
+            }
+            geo.indices.forEach(function(ix) {
+                var newIndex = ix+base;
+                indices.push(newIndex);
+            });
+        }
+
         var offsetX = (this.voxelData.size.x - 1) * -0.5;
         var offsetY = (this.voxelData.size.y - 1) * -0.5;
         var offsetZ = (this.originToBottom) ? 0 : (this.voxelData.size.z - 1) * -0.5;
+
         this.voxelData.voxels.forEach(function(voxel) {
             var vg = this._createVoxGeometry(voxel);
             if (vg) {
-                var x =  (voxel.x + offsetX) * this.voxelSize;
-                var y =  (voxel.y + offsetY) * this.voxelSize;
-                var z =  (voxel.z + offsetZ) * this.voxelSize;
-                var t = new GLBoost.Vector3(x, z, -y);
-                vg._vertices.position.forEach(function(p) {
-                    p.add(t);
-                });
-                if (this.geometry) {
-                    this.geometry.merge(vg);
-                } else {
-                    this.geometry = vg;
-                }
+                var t = new GLBoost.Vector3((voxel.x + offsetX) * this.voxelSize, (voxel.z + offsetZ) * this.voxelSize, -(voxel.y + offsetY) * this.voxelSize);
+                merge(vg, t);
             }
         }.bind(this));
+
+        this.geometry = this.glbc.createGeometry();
+        this.geometry.setVerticesData({
+            position: positions,
+            color: colors,
+            normal: normals,
+            texcoord: texcoords,
+        },[indices]);
 
         if (this.optimizeFaces) {
             // this.geometry.mergeVertices();
@@ -90,7 +108,7 @@
         return vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
     };
 
-    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(voxel) {
+    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(voxel, offset) {
         // 隣接するボクセルを検索し、存在する場合は面を無視する
         var ignoreFaces = [];
         if (this.optimizeFaces) {
@@ -190,49 +208,15 @@
             indices.push(f.a);
             indices.push(f.b);
             indices.push(f.c);
-        }.bind(this));        
-
-/*
-        // 頂点情報構築
-        var positions = [];
-        var colors = [];
-        var normals = [];
-        var texcoords = [];
-        var indices = [];
-        vox.faces.forEach(function(face) {
-            // 頂点
-            positions.push(voxVertices[face.a]);
-            positions.push(voxVertices[face.b]);
-            positions.push(voxVertices[face.c]);
-            // 色
-            colors.push(face.color);
-            colors.push(face.color);
-            colors.push(face.color);
-            // 法線
-            normals.push(new GLBoost.Vector3(1.0, 1.0, 1.0));
-            normals.push(new GLBoost.Vector3(1.0, 1.0, 1.0));
-            normals.push(new GLBoost.Vector3(1.0, 1.0, 1.0));
-            // uv
-            texcoords.push(face.uv);
-            texcoords.push(face.uv);
-            texcoords.push(face.uv);
-
-            // index
-            indices.push(positions.length-3);
-            indices.push(positions.length-2);
-            indices.push(positions.length-1);
         }.bind(this));
-*/
-        var geo = this.glbc.createGeometry();
-        geo.setVerticesData({
+
+        return {
             position: positions,
             color: colors,
             normal: normals,
-            texcoord: texcoords
-        }, [indices]);
-
-        var geo = glBoostContext.createCube(new vec3(1.0, 1.0, 1.0), new vec3(1.0, 1.0, 1.0));
-        return geo;
+            texcoord: texcoords,
+            indices: indices
+        };
     };
 
     /**

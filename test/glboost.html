@@ -14,6 +14,7 @@
   <script>
   var vec3 = GLBoost.Vector3;
   var vec4 = GLBoost.Vector4;
+  var mesh = null;
 
   GLBoost.TARGET_WEBGL_VERSION = 1;
 
@@ -55,12 +56,13 @@
     .then(function(voxelDataArray) {
       voxelDataArray.forEach(function(voxelData, i) {
         var builder = new vox.GLBoostMeshBuilder(glBoostContext, voxelData, {
-          voxelSize: 1.8,
+          voxelSize: 0.1,
           vertexColor: false,
           optimizeFaces: true,
         });
         mesh = builder.createMesh();
         scene.addChild(mesh);
+        expression.prepareToRender();
       });
     });
 
@@ -88,6 +90,13 @@
     cube0.rotate.y += 0.3;
     cube0.rotate.z += 0.5;
     cube0._needUpdate();
+
+    if (mesh) {
+        mesh.rotate.x += 0.5;
+        mesh.rotate.y += 0.1;
+        mesh.rotate.z += 0.3;
+        mesh._needUpdate();
+    }
 
     requestAnimationFrame(render);
   };
