@@ -5991,7 +5991,7 @@
     }, {
       key: 'generateTextureFromImageData',
       value: function generateTextureFromImageData(imageData) {
-        var gl = this.this._glContext.gl;
+        var gl = this._glContext.gl;
         var glem = GLExtensionsManager.getInstance(this._glContext);
 
         this._width = imageData.width;

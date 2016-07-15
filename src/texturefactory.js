@@ -44,6 +44,23 @@
         
         return texture;
     };
+
+    vox.TextureFactory.prototype.getTextureGLBoost = function(voxelData, context) {
+        var palette = voxelData.palette;
+        var hashCode = getHashCode(palette);
+        if (hashCode in cache) {
+            // console.log("cache hit");
+            return cache[hashCode];
+        }
+        
+        var canvas = this.createCanvas(voxelData);
+        var texture = context.createTexture(canvas);
+        texture.needsUpdate = true;
+        
+        cache[hashCode] = texture;
+        
+        return texture;
+    };
     
     var cache = {};
     

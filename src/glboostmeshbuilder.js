@@ -97,7 +97,7 @@
         if (this.vertexColor) {
             // this.material.vertexColors = THREE.FaceColors;
         } else {
-//            this.material.texture = vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
+            this.material.diffuseTexture = vox.GLBoostMeshBuilder.textureFactory.getTextureGLBoost(this.voxelData, this.glbc);
         }
     };
 
@@ -108,7 +108,7 @@
         return vox.GLBoostMeshBuilder.textureFactory.getTexture(this.voxelData);
     };
 
-    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(voxel, offset) {
+    vox.GLBoostMeshBuilder.prototype._createVoxGeometry = function(voxel) {
         // 隣接するボクセルを検索し、存在する場合は面を無視する
         var ignoreFaces = [];
         if (this.optimizeFaces) {
@@ -200,14 +200,36 @@
         vox.vertices.forEach(function(v) {
             positions.push(v);
             colors.push(color);
-            normals.push(new GLBoost.Vector3(1.0, 1.0, 1.0));
+            normals.push(new GLBoost.Vector3(0.0, 0.0, 0.0));
             texcoords.push(uv);
         }.bind(this));
+
+
+        var cross = function(v1, v2) {
+            var x = v1.y * v2.z - v1.z * v2.y;
+            var y = v1.z * v2.x - v1.x * v2.z;
+            var z = v1.x * v2.y - v1.y * v2.x;
+            v1.x = x;
+            v1.y = y;
+            v1.z = z;
+            return v1;
+        }
 
         vox.faces.forEach(function(f) {
             indices.push(f.a);
             indices.push(f.b);
             indices.push(f.c);
+
+            // 法線計算
+            var a = positions[f.a].clone();
+            var b = positions[f.b].clone();
+            var c = positions[f.c].clone();
+            var v1 = b.subtract(a);
+            var v2 = c.subtract(a);
+            var n = cross(v1, v2);
+            normals[f.a].add(n);
+            normals[f.b].add(n);
+            normals[f.c].add(n);
         }.bind(this));
 
         return {
@@ -272,18 +294,6 @@
         { faceA: { a:2, b:3, c:1 }, faceB: { a:2, b:1, c:0 } },
         { faceA: { a:4, b:0, c:1 }, faceB: { a:4, b:1, c:5 } },
         { faceA: { a:7, b:3, c:2 }, faceB: { a:7, b:2, c:6 } },
-    ];
-
-    // 法線データソース
-    var voxNormalsSource = [
-        { x:  1, y: 0, z: 0 },
-        { x:  1, y: 0, z: 0 },
-        { x:  1, y: 0, z: 0 },
-        { x:  1, y: 0, z: 0 },
-        { x:  1, y: 0, z: 0 },
-        { x:  1, y: 0, z: 0 },
-        { x:  1, y: 0, z: 0 },
-        { x:  1, y: 0, z: 0 },
     ];
 
     var hash = function(x, y, z) {

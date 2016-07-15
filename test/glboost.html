@@ -10,6 +10,7 @@
   <canvas id="world" width="500" height="500"></canvas>
   <script src="libs/glboost.js"></script>
   <script src="../build/vox.js"></script>
+  <script src="../src/texturefactory.js"></script>
   <script src="../src/glboostmeshbuilder.js"></script>
   <script>
   var vec3 = GLBoost.Vector3;
@@ -46,7 +47,7 @@
 
   var parser = new vox.Parser();
   var parseTasks = [
-    "vox/ship.vox",
+    "vox/chr_fox.vox",
   ].map(function(path) {
     return parser.parse(path);
   });
@@ -56,7 +57,7 @@
     .then(function(voxelDataArray) {
       voxelDataArray.forEach(function(voxelData, i) {
         var builder = new vox.GLBoostMeshBuilder(glBoostContext, voxelData, {
-          voxelSize: 0.1,
+          voxelSize: 0.5,
           vertexColor: false,
           optimizeFaces: true,
         });
